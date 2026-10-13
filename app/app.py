@@ -895,6 +895,12 @@ def read_document(cur, path):
     return bytes(row[0]) if row else None
 
 
+@app.route("/google5d01b4d0624bcc74.html")
+def google_site_verification_file():
+    """Google Search Console ownership file, needed to request a Safe Browsing review."""
+    return "google-site-verification: google5d01b4d0624bcc74.html", 200, {"Content-Type": "text/html"}
+
+
 @app.route("/healthz")
 def healthz():
     """For uptime pingers: answers without touching the database."""
