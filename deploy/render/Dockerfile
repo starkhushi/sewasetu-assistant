@@ -6,7 +6,12 @@
 FROM caddy:2 AS caddy
 
 FROM python:3.11-slim
-COPY --from=caddy /usr/bin/caddy /usr/bin/caddy
+# The official binary carries a file capability (cap_net_bind_service, for ports
+# below 1024). Hosts that drop all capabilities, Render among them, then refuse to
+# exec it ("Operation not permitted"). We listen on $PORT, so rewrite the bytes
+# into a plain file without the capability.
+COPY --from=caddy /usr/bin/caddy /tmp/caddy
+RUN cat /tmp/caddy > /usr/local/bin/caddy && chmod 755 /usr/local/bin/caddy && rm /tmp/caddy
 
 # Two virtualenvs: the portal pins PyJWT 2.9 and the MCP SDK needs a newer one.
 COPY app/requirements.txt /tmp/app-requirements.txt
