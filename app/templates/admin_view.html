@@ -14,8 +14,10 @@
   <tr><th>IFSC</th><td>{{ a[9] }}</td></tr>
   <tr><th>Document</th><td>{{ a[10] or '-' }}</td></tr>
   <tr><th>Status</th><td><b>{{ a[11] }}</b></td></tr>
-  <tr><th>Submitted</th><td>{{ a[12] }}</td></tr>
+  <tr><th>Submitted</th><td>{{ a[12] }} {% if a[15] == 'AGENT' %}<i>(via assistant)</i>{% endif %}</td></tr>
   <tr><th>Decided</th><td>{{ a[13] or '-' }} {% if a[14] %}by {{ a[14] }}{% endif %}</td></tr>
+  {% if a[16] %}<tr><th>Pension from</th><td>{{ a[16] }}</td></tr>{% endif %}
+  {% if a[17] %}<tr><th>Life certificate due</th><td>{{ a[17] }}</td></tr>{% endif %}
 </table>
 {% if a[11] == 'PENDING' %}
 <h3>Decision</h3>
@@ -25,9 +27,24 @@
 </form>
 &nbsp;
 <form method="post" action="/admin/reject/{{ app_id }}" style="display:inline">
-  <input type="text" name="note" placeholder="Reason for rejection" style="max-width:300px">
+  <input type="text" name="note" placeholder="Reason for rejection (required)" style="max-width:300px" required minlength="10">
   <button class="btn" style="background:#a33" type="submit">Reject</button>
 </form>
+{% endif %}
+{% if grievances %}
+<h3>Complaints</h3>
+<table class="tbl" style="max-width:640px">
+<tr><th>#</th><th>Kind</th><th>What happened</th><th>Status</th><th></th></tr>
+{% for gid, kind, detail, gstatus, raised, by, resolution in grievances %}
+<tr><td>{{ gid }}</td><td>{{ kind }}</td><td>{{ detail }}<br><span class="note">{{ raised }}</span></td>
+  <td>{{ gstatus }}{% if by %}<br><span class="note">{{ by }}: {{ resolution }}</span>{% endif %}</td>
+  <td>{% if gstatus == 'OPEN' %}
+    <form method="post" action="/admin/grievance/{{ gid }}/resolve">
+      <input type="text" name="resolution" placeholder="What was done" style="max-width:220px" required minlength="10">
+      <button class="btn" type="submit" style="padding:6px 10px">Close</button>
+    </form>{% endif %}</td></tr>
+{% endfor %}
+</table>
 {% endif %}
 <h3>Audit trail</h3>
 {% if audit %}

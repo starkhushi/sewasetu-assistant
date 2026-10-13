@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.card{border:1px solid #d7dbe0;padding:14px 18px;margin:16px 0;background:#fafbfc}
+.pass{color:#1b7e3c;font-weight:bold}.fail{color:#a33;font-weight:bold}
+.chat{background:#fff;border:1px solid #e3e6ea;padding:10px;margin:8px 0;font-size:13px;max-height:420px;overflow:auto}
+.chat .u{color:#0b3d6e;margin:6px 0}.chat .a{color:#333;margin:6px 0 10px 16px;white-space:pre-wrap}
+.chat .t{color:#888;font-size:12px;margin-left:16px}
+details summary{cursor:pointer;color:#0b3d6e}
+.meta{font-size:13px;color:#555}
+.big{font-size:28px;font-weight:bold;color:#0b3d6e}
+</style>
+<h2>Evaluation dashboard</h2>
+<p class="note">I invented these people after sitting at the counter in my head for a while:
+each has a name, an age, a village, a way of talking and something they want. A second model
+plays them against the real assistant (Claude Code, a small model, through the live MCP
+endpoint), then the runner reads the portal's database and checks what must be true.
+Pass means every check held.</p>
+<p><span class="big">{{ passed }} / {{ total }}</span> personas passed
+{% if summary %}<span class="meta">&middot; last run {{ summary.ran_at }} &middot; model {{ summary.model }}
+&middot; endpoint {{ summary.mcp_url }}</span>{% endif %}</p>
+
+{% for r in runs %}
+<div class="card">
+  <h3 style="margin-top:0">{{ r.persona.name }} <span class="meta">&mdash; {{ r.persona.age }}, {{ r.persona.village }}</span>
+    &nbsp; {% if r.passed %}<span class="pass">PASS</span>{% else %}<span class="fail">FAIL</span>{% endif %}
+    <span class="meta">({{ r.role }} &middot; {{ r.turns }} turns &middot; {{ r.duration_s }}s)</span></h3>
+  <p class="meta"><b>Who:</b> {{ r.persona.who }}</p>
+  <p class="meta"><b>Wants:</b> {{ r.persona.wants }}</p>
+  <p class="meta"><b>Talks like:</b> {{ r.persona.voice }}</p>
+  <p class="meta"><b>Must be true afterwards:</b> {{ r.persona.must_be_true }}</p>
+  <table class="tbl" style="max-width:720px;font-size:13px">
+    <tr><th>Check</th><th>Result</th><th>Detail</th></tr>
+    {% for c in r.checks %}
+    <tr><td>{{ c.name }}</td>
+        <td>{% if c.ok %}<span class="pass">ok</span>{% else %}<span class="fail">failed</span>{% endif %}</td>
+        <td>{{ c.detail }}</td></tr>
+    {% endfor %}
+  </table>
+  {% if r.notes %}<p class="meta"><b>What I noticed:</b> {{ r.notes }}</p>{% endif %}
+  <details><summary>Conversation</summary>
+    <div class="chat">
+    {% for m in r.transcript %}
+      {% if m.role == 'user' %}<div class="u"><b>{{ r.persona.name.split(' ')[0] }}:</b> {{ m.text }}</div>
+      {% else %}<div class="a">{{ m.text }}</div>
+        {% if m.tools %}<div class="t">tools: {{ m.tools | join(', ') }}</div>{% endif %}{% endif %}
+    {% endfor %}
+    </div>
+  </details>
+</div>
+{% else %}
+<p class="note">No results yet. Run <code>python evals/run.py</code> and reload.</p>
+{% endfor %}
+{% endblock %}

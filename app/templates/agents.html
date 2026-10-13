@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>For AI assistants</h2>
+<p>Any assistant that speaks the Model Context Protocol can apply for the pension and
+follow it up on a citizen's behalf, with the citizen's sign-in. Officers get a separate
+endpoint with their own tools. Both follow the same rules as the form on this site: the
+assistant cannot get anyone a pension the counter would not.</p>
+<table class="tbl" style="max-width:720px">
+  <tr><th>Citizen endpoint</th><td><code>{{ citizen_url }}</code></td></tr>
+  <tr><th>Officer endpoint</th><td><code>{{ officer_url }}</code></td></tr>
+  <tr><th>Transport</th><td>MCP over streamable HTTP</td></tr>
+  <tr><th>Sign-in</th><td>OAuth 2.1 with PKCE, issued by this portal (<code>{{ issuer }}</code>).
+    Citizens sign in with mobile and OTP, officers with the departmental login. The assistant
+    never sees the OTP or the password.</td></tr>
+</table>
+<h3>Connecting from Claude Code</h3>
+<pre style="background:#f4f6f8;padding:10px;border:1px solid #d7dbe0;font-size:13px">claude mcp add --transport http sewasetu-citizen {{ citizen_url }}
+claude mcp add --transport http sewasetu-officer {{ officer_url }}</pre>
+<p class="note">Then run <code>/mcp</code> inside Claude Code and choose <b>Authenticate</b>; the
+sign-in page of this portal opens in the browser. A citizen's sign-in lasts two hours, an
+officer's one working day.</p>
+<h3>What the citizen assistant can do</h3>
+<ul class="note">
+  <li>Explain the scheme and check eligibility (60 or above, one live application per person).</li>
+  <li>Fill the application one question at a time, attach the age proof (by a one-time upload
+      link opened on the phone), read everything back, and submit only after the declaration.</li>
+  <li>Explain the status in plain words: who decided, when, why; which bank account the money
+      goes to; the month the pension runs from; the yearly life confirmation.</li>
+  <li>Withdraw a pending application; raise a complaint when the money has not come; confirm
+      the applicant is alive for the yearly certificate.</li>
+</ul>
+<h3>What the officer assistant can do</h3>
+<ul class="note">
+  <li>See what is waiting, oldest first, with the days left before automatic approval.</li>
+  <li>Look at one case with its audit trail, the things worth a second look, and the document.</li>
+  <li>Approve, or reject with a reason, recorded in the officer's own name. Close complaints.</li>
+</ul>
+<p class="note">Applications made through an assistant show "via assistant" on the officer's
+pages and in the audit trail. See also the <a href="/eval-dashboard">evaluation dashboard</a>.</p>
+{% endblock %}

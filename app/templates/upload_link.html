@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Attach your age proof</h2>
+<p class="note">Your assistant asked for the age-proof document for the application from
+mobile number <b>{{ mobile }}</b>. Choose a photo or PDF of the birth certificate, school
+leaving certificate or Voter ID. <b>JPG, PNG or PDF, up to 5 MB.</b> This link works once.</p>
+<form method="post" enctype="multipart/form-data">
+  <label>Select Document</label>
+  <input type="file" name="document" accept=".jpg,.jpeg,.png,.pdf,image/*">
+  <p><button class="btn" type="submit">Upload</button></p>
+</form>
+{% endblock %}

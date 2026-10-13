@@ -5,6 +5,9 @@ services:
       POSTGRES_DB: sewasetu
       POSTGRES_USER: sewasetu
       POSTGRES_PASSWORD: sewasetu123
+    ports:
+      # local only: the eval runner reads the database after each conversation
+      - "127.0.0.1:55432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./app/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
@@ -20,12 +23,41 @@ services:
       # the address at which people reach this portal; stamped into sign-in tokens and
       # discovery documents, so it must be the public one when deployed
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8000}
+      # the two MCP servers, as the public sees them; tokens for them are accepted by the API
+      MCP_CITIZEN_URL: ${MCP_CITIZEN_URL:-http://localhost:8101/mcp/citizen}
+      MCP_OFFICER_URL: ${MCP_OFFICER_URL:-http://localhost:8102/mcp/officer}
+      EVAL_RESULTS_DIR: /app/eval_results
     depends_on:
       - db
       - smsgw
     volumes:
       - uploads:/var/sewasetu/uploads
       - applogs:/var/log/sewasetu
+      - ./evals/results:/app/eval_results:ro
+
+  mcp-citizen:
+    build: ./mcp
+    command: ["python", "-m", "sewasetu_mcp.citizen"]
+    ports:
+      - "8101:8101"
+    environment:
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8000}
+      PORTAL_INTERNAL_URL: http://app:8000
+      MCP_CITIZEN_URL: ${MCP_CITIZEN_URL:-http://localhost:8101/mcp/citizen}
+    depends_on:
+      - app
+
+  mcp-officer:
+    build: ./mcp
+    command: ["python", "-m", "sewasetu_mcp.officer"]
+    ports:
+      - "8102:8102"
+    environment:
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8000}
+      PORTAL_INTERNAL_URL: http://app:8000
+      MCP_OFFICER_URL: ${MCP_OFFICER_URL:-http://localhost:8102/mcp/officer}
+    depends_on:
+      - app
 
   scheduler:
     build: ./app

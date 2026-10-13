@@ -115,6 +115,81 @@ def write_audit(cur, app_id, action, actor, note=""):
                 (app_id, action, actor, note, datetime.now()))
 
 
+def apply_migrations():
+    """Bring the database up to the shape in migrations.sql. Idempotent; the four
+    gunicorn workers race here, so it runs under a transaction-level advisory lock."""
+    path = os.path.join(BASE_DIR, "migrations.sql")
+    try:
+        with open(path) as fh:
+            sql = fh.read()
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT pg_advisory_xact_lock(7331)")
+        cur.execute(sql)
+        conn.commit()
+        cur.close(); conn.close()
+    except Exception as e:
+        app.logger.error("migrations: %s" % e)
+
+
+# ---------------------------------------------------------------------------
+# Decisions: the single place an application changes from PENDING to a decided
+# state, used by the web admin pages, the officer API and (for its vocabulary)
+# the nightly deemed-approval job. Records who decided and why, and derives the
+# dates that follow from an approval.
+# ---------------------------------------------------------------------------
+
+PENSION_PER_MONTH = 250
+REJECT_REASON_MIN = 10   # characters; "no" is not a reason an applicant can act on
+LIFE_CERT_MONTHS = 12
+
+
+def deemed_on(submitted_at):
+    """The day a still-pending application stands approved under the RTPS Act."""
+    return (submitted_at + timedelta(days=SLA_DAYS)).date()
+
+
+def effective_from_for(submitted_at):
+    """Pension runs from the first day of the month the application was made.
+    (Setting it to the month of the decision instead is how applicants lose arrears.)"""
+    return submitted_at.date().replace(day=1)
+
+
+def decide_application(cur, app_id, new_status, actor, note=""):
+    """Approve or reject a PENDING application. Returns (application_no, mobile)
+    or None if it was not pending. Raises ValueError when a rejection has no usable
+    reason. The caller commits and then calls notify_decision()."""
+    note = (note or "").strip()
+    if new_status == "REJECTED" and len(note) < REJECT_REASON_MIN:
+        raise ValueError("a rejection needs a reason the applicant can act on "
+                         "(at least %d characters)" % REJECT_REASON_MIN)
+    now = datetime.now()
+    if new_status in ("APPROVED", "DEEMED_APPROVED"):
+        cur.execute("UPDATE applications SET status = %s, decided_at = %s, decided_by = %s, "
+                    "effective_from = date_trunc('month', submitted_at)::date, "
+                    "life_certificate_due = %s "
+                    "WHERE id = %s AND status = 'PENDING' RETURNING application_no, mobile",
+                    (new_status, now, actor, (now + timedelta(days=30 * LIFE_CERT_MONTHS)).date(),
+                     app_id))
+    else:
+        cur.execute("UPDATE applications SET status = %s, decided_at = %s, decided_by = %s "
+                    "WHERE id = %s AND status = 'PENDING' RETURNING application_no, mobile",
+                    (new_status, now, actor, app_id))
+    row = cur.fetchone()
+    if row:
+        write_audit(cur, app_id, new_status, "admin:%s" % actor, note)
+    return row
+
+
+def notify_decision(app_no, mobile, new_status, note=""):
+    if new_status == "APPROVED":
+        send_sms(mobile, "Sewa Setu: application %s is APPROVED. Pension of Rs %d/month will be "
+                         "credited to your bank account by DBT." % (app_no, PENSION_PER_MONTH))
+    elif new_status == "REJECTED":
+        send_sms(mobile, "Sewa Setu: application %s is REJECTED. Reason: %s. You may apply "
+                         "afresh after correcting this." % (app_no, note[:120]))
+
+
 # ---------------------------------------------------------------------------
 # Scheme rules: the single source of truth for what an application must satisfy.
 # Every channel that creates an application (the web form, any API, any batch
@@ -185,23 +260,30 @@ def active_application(cur, mobile):
     return cur.fetchone()
 
 
-def create_application(cur, mobile, cleaned):
+def create_application(cur, mobile, cleaned, channel="WEB"):
     """Insert a validated application; ensure the status-portal account exists.
 
     The caller commits. Returns (id, application_no).
     """
-    app_no = new_application_no()
+    # SSP + year + 6 random digits: with ~100k numbers already issued a fresh draw hits
+    # an existing one about one time in nine, so draw until it is unused (the unique
+    # index in migrations.sql is the backstop).
+    while True:
+        app_no = new_application_no()
+        cur.execute("SELECT 1 FROM applications WHERE application_no = %s", (app_no,))
+        if not cur.fetchone():
+            break
     cur.execute(
         """INSERT INTO applications
            (application_no, applicant_name, mobile, dob, gender, marital_status,
             husband_name, husband_employer, village, block, bank_account, ifsc,
-            doc_path, status, submitted_at)
-           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'PENDING',%s)
+            doc_path, status, submitted_at, channel)
+           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'PENDING',%s,%s)
            RETURNING id""",
         (app_no, cleaned["applicant_name"], mobile, cleaned["dob"], cleaned["gender"],
          cleaned["marital_status"], cleaned["husband_name"], cleaned["husband_employer"],
          cleaned["village"], cleaned["block"], cleaned["bank_account"], cleaned["ifsc"],
-         cleaned["doc_path"], datetime.now()))
+         cleaned["doc_path"], datetime.now(), channel))
     new_id = cur.fetchone()[0]
 
     # status portal account; password is DOB as DDMMYYYY per dept. circular
@@ -476,14 +558,19 @@ def view_application(app_id):
     conn = get_db()
     cur = conn.cursor()
     cur.execute("SELECT application_no, applicant_name, mobile, dob, village, block, "
-                "bank_account, ifsc, status, submitted_at, decided_at "
+                "bank_account, ifsc, status, submitted_at, decided_at, channel, "
+                "effective_from, life_certificate_due "
                 "FROM applications WHERE id = %s AND mobile = %s",
                 (app_id, session.get("portal_mobile")))
     row = cur.fetchone()
-    cur.close(); conn.close()
     if not row:
+        cur.close(); conn.close()
         abort(404)
-    return render_template("application.html", a=row, app_id=app_id)
+    cur.execute("SELECT id, kind, detail, status, raised_at, resolution FROM grievances "
+                "WHERE application_id = %s ORDER BY raised_at DESC", (app_id,))
+    grievances = cur.fetchall()
+    cur.close(); conn.close()
+    return render_template("application.html", a=row, app_id=app_id, grievances=grievances)
 
 
 @app.route("/application/<int:app_id>/withdraw", methods=["POST"])
@@ -589,9 +676,12 @@ def admin_dashboard():
     cur.execute("SELECT block, count(*) FROM applications WHERE status = 'PENDING' "
                 "GROUP BY block ORDER BY count(*) DESC")
     by_block = cur.fetchall()
+    cur.execute("SELECT count(*) FROM grievances WHERE status = 'OPEN'")
+    open_complaints = cur.fetchone()[0]
     cur.close(); conn.close()
     return render_template("admin_dashboard.html", by_status=by_status,
-                           overdue=overdue, by_block=by_block, sla=SLA_DAYS)
+                           overdue=overdue, by_block=by_block, sla=SLA_DAYS,
+                           open_complaints=open_complaints)
 
 
 @app.route("/admin/applications")
@@ -626,7 +716,8 @@ def admin_view(app_id):
     cur = conn.cursor()
     cur.execute("SELECT application_no, applicant_name, mobile, dob, gender, "
                 "marital_status, village, block, bank_account, ifsc, doc_path, "
-                "status, submitted_at, decided_at, decided_by "
+                "status, submitted_at, decided_at, decided_by, channel, effective_from, "
+                "life_certificate_due "
                 "FROM applications WHERE id = %s", (app_id,))
     row = cur.fetchone()
     if not row:
@@ -635,8 +726,12 @@ def admin_view(app_id):
     cur.execute("SELECT at, action, actor, note FROM audit_log "
                 "WHERE application_id = %s ORDER BY at ASC", (app_id,))
     audit = cur.fetchall()
+    cur.execute("SELECT id, kind, detail, status, raised_at, resolved_by, resolution "
+                "FROM grievances WHERE application_id = %s ORDER BY raised_at DESC", (app_id,))
+    grievances = cur.fetchall()
     cur.close(); conn.close()
-    return render_template("admin_view.html", a=row, app_id=app_id, audit=audit)
+    return render_template("admin_view.html", a=row, app_id=app_id, audit=audit,
+                           grievances=grievances)
 
 
 def _admin_decide(app_id, new_status, note):
@@ -646,18 +741,156 @@ def _admin_decide(app_id, new_status, note):
     actor = session.get("admin_user", ADMIN_USERNAME)
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("UPDATE applications SET status = %s, decided_at = %s, decided_by = %s "
-                "WHERE id = %s AND status = 'PENDING' RETURNING application_no",
-                (new_status, datetime.now(), actor, app_id))
-    row = cur.fetchone()
+    try:
+        row = decide_application(cur, app_id, new_status, actor, note)
+    except ValueError as e:
+        cur.close(); conn.close()
+        flash("Not recorded: %s." % e)
+        return redirect(url_for("admin_view", app_id=app_id))
     if row:
-        write_audit(cur, app_id, new_status, "admin:%s" % actor, note)
         conn.commit()
+        notify_decision(row[0], row[1], new_status, note)
         flash("Application %s %s." % (row[0], new_status.lower()))
     else:
         flash("Only a pending application can be decided.")
     cur.close(); conn.close()
     return redirect(url_for("admin_view", app_id=app_id))
+
+
+@app.route("/admin/grievance/<int:gid>/resolve", methods=["POST"])
+def admin_resolve_grievance(gid):
+    if not session.get("admin"):
+        abort(403)
+    actor = session.get("admin_user", ADMIN_USERNAME)
+    conn = get_db()
+    cur = conn.cursor()
+    app_id = resolve_grievance(cur, gid, actor, request.form.get("resolution", ""))
+    conn.commit()
+    cur.close(); conn.close()
+    if app_id is None:
+        flash("Grievance not found, already resolved, or the resolution is too short.")
+        return redirect(url_for("admin_dashboard"))
+    return redirect(url_for("admin_view", app_id=app_id))
+
+
+def resolve_grievance(cur, gid, actor, resolution):
+    """Close an open grievance in the officer's name. Returns the application id,
+    or None if nothing was closed. The caller commits."""
+    resolution = (resolution or "").strip()
+    if len(resolution) < REJECT_REASON_MIN:
+        return None
+    cur.execute("UPDATE grievances SET status = 'RESOLVED', resolved_at = %s, resolved_by = %s, "
+                "resolution = %s WHERE id = %s AND status = 'OPEN' "
+                "RETURNING application_id, mobile, kind",
+                (datetime.now(), actor, resolution[:1000], gid))
+    row = cur.fetchone()
+    if not row:
+        return None
+    write_audit(cur, row[0], "GRIEVANCE_CLOSED", "admin:%s" % actor, resolution[:500])
+    send_sms(row[1], "Sewa Setu: your complaint (%s) has been looked into. %s"
+             % (row[2].replace("_", " ").lower(), resolution[:110]))
+    return row[0]
+
+
+# ---------------------------------------------------------------------------
+# Agent channel: pages that support the MCP servers (the API itself is api.py)
+# ---------------------------------------------------------------------------
+
+@app.route("/agents")
+def agents_page():
+    """The official channel for AI assistants: where the endpoints are and what they may do."""
+    return render_template("agents.html", issuer=os.environ.get("PUBLIC_BASE_URL",
+                                                                 "http://localhost:8000"),
+                           citizen_url=os.environ.get("MCP_CITIZEN_URL", "http://localhost:8101/mcp/citizen"),
+                           officer_url=os.environ.get("MCP_OFFICER_URL", "http://localhost:8102/mcp/officer"))
+
+
+@app.route("/upload/<token>", methods=["GET", "POST"])
+def upload_by_link(token):
+    """One-time page, opened on the phone's browser, that attaches an age-proof file to
+    the draft an assistant is filling in. The token is the proof: it was handed out to
+    the signed-in citizen's assistant and dies on first use or after 30 minutes."""
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT mobile, created_at, used_at FROM upload_tokens WHERE token = %s", (token,))
+    row = cur.fetchone()
+    if not row or row[2] is not None or (datetime.now() - row[1]).total_seconds() > 1800:
+        cur.close(); conn.close()
+        return render_template("oauth_error.html", error="This upload link is no longer valid",
+                               detail="Ask your assistant for a fresh link."), 410
+    mobile = row[0]
+    if request.method == "POST":
+        f = request.files.get("document")
+        problem = check_upload(f)
+        if problem:
+            flash(problem)
+        else:
+            path = store_upload(mobile, f.filename, f.read())
+            cur.execute("INSERT INTO drafts (mobile, data, doc_path, channel, updated_at) "
+                        "VALUES (%s, '{}'::jsonb, %s, 'AGENT', %s) ON CONFLICT (mobile) DO UPDATE "
+                        "SET doc_path = EXCLUDED.doc_path, updated_at = EXCLUDED.updated_at",
+                        (mobile, path, datetime.now()))
+            cur.execute("UPDATE upload_tokens SET used_at = %s WHERE token = %s",
+                        (datetime.now(), token))
+            conn.commit()
+            cur.close(); conn.close()
+            return render_template("upload_done.html", doc_name=os.path.basename(path))
+    cur.close(); conn.close()
+    return render_template("upload_link.html", mobile=mobile)
+
+
+def check_upload(f):
+    """The web form's file rules, in one place. Returns a problem string or None."""
+    if f is None or f.filename == "":
+        return "Please choose a file to upload (JPG, PNG or PDF, up to 5 MB)."
+    if f.filename.lower().rsplit(".", 1)[-1] not in ("pdf", "jpg", "jpeg", "png"):
+        return "Please upload a JPG, PNG or PDF file."
+    f.seek(0, 2)
+    size = f.tell()
+    f.seek(0)
+    if size > 5 * 1024 * 1024:
+        return "File is larger than 5 MB. Please upload a smaller file."
+    return None
+
+
+def store_upload(mobile, filename, content):
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    safe = re.sub(r"[^A-Za-z0-9._-]", "_", os.path.basename(filename.lower()))[-80:]
+    path = os.path.join(UPLOAD_DIR, "%s_%s" % (mobile, safe))
+    with open(path, "wb") as out:
+        out.write(content)
+    return path
+
+
+EVAL_RESULTS_DIR = os.environ.get("EVAL_RESULTS_DIR", os.path.join(BASE_DIR, "eval_results"))
+
+
+@app.route("/eval-dashboard")
+def eval_dashboard():
+    """The people I invented, what they said to the assistant, what I checked in the
+    database afterwards, and what passed. Rendered from evals/results/*.json."""
+    import json
+    runs = []
+    try:
+        names = sorted(n for n in os.listdir(EVAL_RESULTS_DIR) if n.endswith(".json")
+                       and n != "summary.json")
+    except OSError:
+        names = []
+    for n in names:
+        try:
+            with open(os.path.join(EVAL_RESULTS_DIR, n), encoding="utf-8") as fh:
+                runs.append(json.load(fh))
+        except (OSError, ValueError) as e:
+            app.logger.error("eval result %s unreadable: %s" % (n, e))
+    summary = None
+    try:
+        with open(os.path.join(EVAL_RESULTS_DIR, "summary.json"), encoding="utf-8") as fh:
+            summary = json.load(fh)
+    except (OSError, ValueError):
+        pass
+    passed = sum(1 for r in runs if r.get("passed"))
+    return render_template("eval_dashboard.html", runs=runs, summary=summary,
+                           passed=passed, total=len(runs))
 
 
 @app.route("/admin/approve/<int:app_id>", methods=["POST"])
@@ -672,6 +905,10 @@ def admin_reject(app_id):
 
 from oauth import oauth as _oauth_blueprint   # noqa: E402  (needs the definitions above)
 app.register_blueprint(_oauth_blueprint)
+from api import api as _api_blueprint         # noqa: E402
+app.register_blueprint(_api_blueprint)
+
+apply_migrations()
 
 
 if __name__ == "__main__":

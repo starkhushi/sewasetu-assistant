@@ -38,12 +38,16 @@ def main():
     )
     cur = conn.cursor()
     cutoff = datetime.now() - timedelta(days=SLA_DAYS)
+    # Same derived dates as an officer's approval (see decide_application in app.py):
+    # pension from the month of application, life certificate a year from today.
     cur.execute(
         """UPDATE applications
-           SET status = 'DEEMED_APPROVED', decided_at = %s, decided_by = 'RTPS-AUTO'
+           SET status = 'DEEMED_APPROVED', decided_at = %s, decided_by = 'RTPS-AUTO',
+               effective_from = date_trunc('month', submitted_at)::date,
+               life_certificate_due = %s
            WHERE status = 'PENDING' AND submitted_at < %s
            RETURNING application_no, mobile""",
-        (datetime.now(), cutoff))
+        (datetime.now(), (datetime.now() + timedelta(days=360)).date(), cutoff))
     rows = cur.fetchall()
     cur.execute("SELECT id FROM applications WHERE status = 'DEEMED_APPROVED' "
                 "AND decided_by = 'RTPS-AUTO' AND decided_at >= %s",

@@ -11,9 +11,20 @@
   <tr><th>Bank Account</th><td>{{ a[6] }}</td></tr>
   <tr><th>IFSC</th><td>{{ a[7] }}</td></tr>
   <tr><th>Status</th><td><b>{{ a[8] }}</b></td></tr>
-  <tr><th>Submitted</th><td>{{ a[9] }}</td></tr>
+  <tr><th>Submitted</th><td>{{ a[9] }} {% if a[11] == 'AGENT' %}<i>(through your assistant)</i>{% endif %}</td></tr>
   <tr><th>Decided</th><td>{{ a[10] or '-' }}</td></tr>
+  {% if a[12] %}<tr><th>Pension payable from</th><td>{{ a[12] }}</td></tr>{% endif %}
+  {% if a[13] %}<tr><th>Yearly life certificate due</th><td>{{ a[13] }}</td></tr>{% endif %}
 </table>
+{% if grievances %}
+<h3>Your complaints</h3>
+<table class="tbl" style="max-width:640px">
+<tr><th>#</th><th>Kind</th><th>Raised</th><th>Status</th><th>Reply</th></tr>
+{% for gid, kind, detail, gstatus, raised, resolution in grievances %}
+<tr><td>{{ gid }}</td><td>{{ kind }}</td><td>{{ raised }}</td><td>{{ gstatus }}</td><td>{{ resolution or '-' }}</td></tr>
+{% endfor %}
+</table>
+{% endif %}
 <p><a href="/ack/{{ app_id }}.pdf">Download Acknowledgment (PDF)</a> &middot;
 <a href="/status/connections">Connected applications</a></p>
 {% if a[8] == 'PENDING' %}
