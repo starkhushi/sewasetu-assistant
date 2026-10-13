@@ -33,7 +33,7 @@ flow instead (see README).</p>
 <tr><td>{{ name or cid }}</td><td>{{ c }}</td><td>{{ e }}</td>
 <td><form method="post" style="display:inline"><input type="hidden" name="revoke_subject" value="{{ subject }}">
 <input type="hidden" name="token_hash" value="{{ h }}">
-<button class="btn" style="background:#a33;padding:4px 10px" type="submit">End now</button></form></td></tr>
+<button class="btn btn-danger btn-sm" type="submit">End now</button></form></td></tr>
 {% endfor %}
 </table>
 {% else %}<p class="note">None.</p>{% endif %}

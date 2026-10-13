@@ -1,26 +1,81 @@
 {% extends "base.html" %}
+{% block extra_css %}
+.hero{display:grid;gap:22px;grid-template-columns:1.4fr 1fr;align-items:center;margin-bottom:8px}
+.hero .amount{font-size:44px;font-weight:700;color:var(--navy);line-height:1}
+.hero .amount small{font-size:18px;font-weight:600;color:var(--muted)}
+.hero .ctas{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.window{background:var(--soft-amber);border:1px solid #f1d29b;border-radius:var(--radius);padding:14px 16px}
+.window.closed{background:var(--soft-red);border-color:#e8a19c}
+.ways .card h4{margin:0 0 6px;color:var(--navy);font-size:17px}
+.ways .card p{margin:0;font-size:15px;color:var(--muted)}
+.ways .icon{font-size:26px;line-height:1;margin-bottom:8px}
+ol.how{counter-reset:h;list-style:none;padding:0;margin:0}
+ol.how li{counter-increment:h;position:relative;padding:4px 0 12px 46px}
+ol.how li::before{content:counter(h);position:absolute;left:0;top:0;width:32px;height:32px;border-radius:50%;
+  background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700}
+ul.need{padding-left:20px;margin:0}
+ul.need li{margin:4px 0}
+@media (max-width:640px){.hero{grid-template-columns:1fr}.hero .amount{font-size:36px}}
+{% endblock %}
 {% block content %}
-<h2>Welcome</h2>
-<p>The Old Age Pension Scheme provides a monthly pension of Rs. 250 to eligible
-senior citizens aged 60 years and above who are residents of Purvanchal.</p>
-{% if hours_left is not none %}
-<p><b>Application window closes in approximately {{ hours_left }} hours</b>
-(midnight, 31 October).</p>
-{% else %}
-<p><b>The application window for this scheme has closed.</b></p>
-{% endif %}
-<p>
-  <a href="/apply"><button class="btn">Apply for Pension</button></a>
-  &nbsp;
-  <a href="/status"><button class="btn" style="background:#555">Check Application Status</button></a>
-</p>
-<h3>How to apply</h3>
-<ol class="note">
-  <li>Verify your mobile number with OTP.</li>
-  <li>Fill the application form (personal details, address, bank details).</li>
-  <li>Upload your age proof document (JPG or PDF, maximum 5 MB).</li>
-  <li>Submit the declaration. Note down your Application Number.</li>
-</ol>
-<p class="note">For assistance visit your nearest Block Development Office, or
-<a href="/agents">apply through an AI assistant</a> on your phone.</p>
+<section class="hero">
+  <div>
+    <h2>Old Age Pension</h2>
+    <div class="amount">Rs. 250 <small>every month</small></div>
+    <p>For every resident of Purvanchal aged <b>60 years or above</b>, paid straight into your
+    own bank account.</p>
+    <div class="ctas">
+      <a class="btn" href="/apply">Apply for Pension</a>
+      <a class="btn btn-light" href="/status">Check Application Status</a>
+    </div>
+  </div>
+  {% if hours_left is not none %}
+  <div class="window">
+    <b>Applications are open</b><br>
+    The window closes in about <b>{{ hours_left }} hours</b> (midnight, 31 October).
+  </div>
+  {% else %}
+  <div class="window closed"><b>The application window for this scheme has closed.</b><br>
+    You can still check the status of an application.</div>
+  {% endif %}
+</section>
+
+<h3>Three ways to apply</h3>
+<div class="grid ways">
+  <div class="card"><div class="icon" aria-hidden="true">&#128241;</div><h4>On this website</h4>
+    <p>Six short steps on any phone. Takes about 10 minutes.</p></div>
+  <div class="card"><div class="icon" aria-hidden="true">&#128172;</div><h4>With an AI assistant</h4>
+    <p>Ask ChatGPT, Claude or another assistant to apply for you. It asks one question at a time.
+    <a href="/agents">How it works</a></p></div>
+  <div class="card"><div class="icon" aria-hidden="true">&#127963;</div><h4>At the block office</h4>
+    <p>The counter or a CSC kiosk will fill it in with you.</p></div>
+</div>
+<p class="note">Whichever way you apply, it is the same application with the same rules, and it
+shows up in the same place.</p>
+
+<div class="grid" style="margin-top:8px">
+  <div>
+    <h3>How to apply</h3>
+    <ol class="how">
+      <li>Verify the applicant's mobile number with an OTP.</li>
+      <li>Fill in personal details, address and bank details.</li>
+      <li>Upload one age-proof document.</li>
+      <li>Read the preview, accept the declaration and note down the Application Number.</li>
+    </ol>
+  </div>
+  <div>
+    <h3>Keep these ready</h3>
+    <ul class="need">
+      <li>The applicant's own mobile phone (for the OTP)</li>
+      <li>Birth certificate, school leaving certificate <b>or</b> Voter ID (a photo is fine)</li>
+      <li>Bank passbook: account number and IFSC, in the applicant's own name</li>
+    </ul>
+    <p class="note">Aadhaar is not needed.</p>
+  </div>
+</div>
+
+<h3>After you apply</h3>
+<p>The block officer decides within <b>15 days</b>. If no decision is made in that time, the law
+approves the application automatically. The pension is paid from the month you applied.</p>
+<p class="note">For help, visit your nearest Block Development Office.</p>
 {% endblock %}

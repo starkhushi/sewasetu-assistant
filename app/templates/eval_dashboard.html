@@ -1,54 +1,75 @@
 {% extends "base.html" %}
+{% block title %}Evaluation dashboard - Sewa Setu{% endblock %}
+{% block extra_css %}
+.persona{border:1px solid var(--line);border-radius:var(--radius);margin:16px 0;overflow:hidden}
+.persona > header{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:14px 18px;background:#f7f9fb;border-bottom:1px solid var(--line)}
+.persona > header h3{margin:0;font-size:19px}
+.persona > header .meta{color:var(--muted);font-size:14px}
+.persona .body{padding:14px 18px}
+.facts{display:grid;gap:4px 16px;grid-template-columns:130px 1fr;font-size:15px;margin:0 0 12px}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0}
+.checks{list-style:none;padding:0;margin:0 0 10px}
+.checks li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-top:1px solid #eef1f4;font-size:15px}
+.checks li:first-child{border-top:none}
+.checks .d{color:var(--muted);font-size:14px}
+details summary{cursor:pointer;color:var(--navy-2);font-weight:600;padding:6px 0}
+.chat{background:#f4f6f9;border-radius:var(--radius);padding:12px;max-height:520px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:85%;padding:9px 13px;border-radius:14px;font-size:15px;white-space:pre-wrap;line-height:1.45}
+.msg.u{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px}
+.msg.a{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg .tools{display:block;margin-top:6px;font-size:12px;color:var(--muted);font-family:ui-monospace,Consolas,monospace}
+.headline{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap}
+.headline .big{font-size:40px;font-weight:700;color:var(--navy)}
+{% endblock %}
 {% block content %}
-<style>
-.card{border:1px solid #d7dbe0;padding:14px 18px;margin:16px 0;background:#fafbfc}
-.pass{color:#1b7e3c;font-weight:bold}.fail{color:#a33;font-weight:bold}
-.chat{background:#fff;border:1px solid #e3e6ea;padding:10px;margin:8px 0;font-size:13px;max-height:420px;overflow:auto}
-.chat .u{color:#0b3d6e;margin:6px 0}.chat .a{color:#333;margin:6px 0 10px 16px;white-space:pre-wrap}
-.chat .t{color:#888;font-size:12px;margin-left:16px}
-details summary{cursor:pointer;color:#0b3d6e}
-.meta{font-size:13px;color:#555}
-.big{font-size:28px;font-weight:bold;color:#0b3d6e}
-</style>
 <h2>Evaluation dashboard</h2>
-<p class="note">I invented these people after sitting at the counter in my head for a while:
-each has a name, an age, a village, a way of talking and something they want. A second model
-plays them against the real assistant (Claude Code, a small model, through the live MCP
-endpoint), then the runner reads the portal's database and checks what must be true.
-Pass means every check held.</p>
-<p><span class="big">{{ passed }} / {{ total }}</span> personas passed
-{% if summary %}<span class="meta">&middot; last run {{ summary.ran_at }} &middot; model {{ summary.model }}
-&middot; endpoint {{ summary.mcp_url }}</span>{% endif %}</p>
+<p>I invented these people after sitting at the counter in my head for a while. Each has a name, an
+age, a village, a way of talking and something they want. A second model plays them against the real
+assistant (Claude Code with a small model, through the live MCP endpoint, signed in through this
+portal's own pages). Afterwards I read the portal's database and check what must be true.
+<b>Pass means every check held.</b></p>
+
+<div class="grid" style="margin:16px 0">
+  <div class="stat"><div class="n">{{ passed }} / {{ total }}</div><div class="l">personas passed</div></div>
+  {% if summary %}
+  <div class="stat"><div class="n" style="font-size:20px">{{ summary.model }}</div><div class="l">assistant model</div></div>
+  <div class="stat"><div class="n" style="font-size:20px">{{ summary.ran_at }}</div><div class="l">last run</div></div>
+  {% endif %}
+</div>
 
 {% for r in runs %}
-<div class="card">
-  <h3 style="margin-top:0">{{ r.persona.name }} <span class="meta">&mdash; {{ r.persona.age }}, {{ r.persona.village }}</span>
-    &nbsp; {% if r.passed %}<span class="pass">PASS</span>{% else %}<span class="fail">FAIL</span>{% endif %}
-    <span class="meta">({{ r.role }} &middot; {{ r.turns }} turns &middot; {{ r.duration_s }}s)</span></h3>
-  <p class="meta"><b>Who:</b> {{ r.persona.who }}</p>
-  <p class="meta"><b>Wants:</b> {{ r.persona.wants }}</p>
-  <p class="meta"><b>Talks like:</b> {{ r.persona.voice }}</p>
-  <p class="meta"><b>Must be true afterwards:</b> {{ r.persona.must_be_true }}</p>
-  <table class="tbl" style="max-width:720px;font-size:13px">
-    <tr><th>Check</th><th>Result</th><th>Detail</th></tr>
-    {% for c in r.checks %}
-    <tr><td>{{ c.name }}</td>
-        <td>{% if c.ok %}<span class="pass">ok</span>{% else %}<span class="fail">failed</span>{% endif %}</td>
-        <td>{{ c.detail }}</td></tr>
-    {% endfor %}
-  </table>
-  {% if r.notes %}<p class="meta"><b>What I noticed:</b> {{ r.notes }}</p>{% endif %}
-  <details><summary>Conversation</summary>
-    <div class="chat">
-    {% for m in r.transcript %}
-      {% if m.role == 'user' %}<div class="u"><b>{{ r.persona.name.split(' ')[0] }}:</b> {{ m.text }}</div>
-      {% else %}<div class="a">{{ m.text }}</div>
-        {% if m.tools %}<div class="t">tools: {{ m.tools | join(', ') }}</div>{% endif %}{% endif %}
-    {% endfor %}
-    </div>
-  </details>
-</div>
+<section class="persona">
+  <header>
+    <span class="badge {{ 'ok' if r.passed else 'fail' }}">{{ 'PASS' if r.passed else 'FAIL' }}</span>
+    <h3>{{ r.persona.name }}</h3>
+    <span class="meta">{{ r.persona.age }} &middot; {{ r.persona.village }} &middot; {{ r.role }} &middot; {{ r.turns }} replies &middot; {{ r.duration_s }}s</span>
+  </header>
+  <div class="body">
+    <dl class="facts">
+      <dt>Who</dt><dd>{{ r.persona.who }}</dd>
+      <dt>Wants</dt><dd>{{ r.persona.wants }}</dd>
+      <dt>Talks like</dt><dd>{{ r.persona.voice }}</dd>
+      <dt>Must be true</dt><dd>{{ r.persona.must_be_true }}</dd>
+    </dl>
+    <ul class="checks">
+      {% for c in r.checks %}
+      <li><span class="badge {{ 'ok' if c.ok else 'fail' }}">{{ 'ok' if c.ok else 'failed' }}</span>
+        <span>{{ c.name }}<br><span class="d">{{ c.detail }}</span></span></li>
+      {% endfor %}
+    </ul>
+    {% if r.notes %}<p class="note"><b>What I noticed:</b> {{ r.notes }}</p>{% endif %}
+    <details><summary>Read the conversation</summary>
+      <div class="chat">
+      {% for m in r.transcript %}
+        {% if m.role == 'user' %}<div class="msg u">{{ m.text }}</div>
+        {% else %}<div class="msg a">{{ m.text }}{% if m.tools %}<span class="tools">{{ m.tools | join(' · ') }}</span>{% endif %}</div>{% endif %}
+      {% endfor %}
+      </div>
+    </details>
+  </div>
+</section>
 {% else %}
-<p class="note">No results yet. Run <code>python evals/run.py</code> and reload.</p>
+<div class="card"><b>No results yet.</b> <span class="note">Run <code>python evals/run.py</code> and reload.</span></div>
 {% endfor %}
 {% endblock %}

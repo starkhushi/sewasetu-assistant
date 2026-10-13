@@ -1,0 +1,6 @@
+{# The six steps of the paper form, as a progress bar. Set `step` before including. #}
+<ol class="progress" aria-label="Step {{ step }} of 6">
+{% for name in ["Mobile", "Personal", "Address", "Bank", "Document", "Declaration"] %}
+  <li class="{{ 'done' if loop.index < step else ('now' if loop.index == step else '') }}">{{ name }}</li>
+{% endfor %}
+</ol>

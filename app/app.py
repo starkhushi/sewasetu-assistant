@@ -573,8 +573,13 @@ def view_application(app_id):
     cur.execute("SELECT id, kind, detail, status, raised_at, resolution FROM grievances "
                 "WHERE application_id = %s ORDER BY raised_at DESC", (app_id,))
     grievances = cur.fetchall()
+    cur.execute("SELECT note FROM audit_log WHERE application_id = %s AND action = 'REJECTED' "
+                "ORDER BY at DESC LIMIT 1", (app_id,))
+    r = cur.fetchone()
     cur.close(); conn.close()
-    return render_template("application.html", a=row, app_id=app_id, grievances=grievances)
+    return render_template("application.html", a=row, app_id=app_id, grievances=grievances,
+                           deemed=deemed_on(row[9]) if row[9] else None,
+                           reason=(r[0] if r and r[0] else None))
 
 
 @app.route("/application/<int:app_id>/withdraw", methods=["POST"])

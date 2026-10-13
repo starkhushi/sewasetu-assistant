@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
+{% set step = 4 %}{% include "_progress.html" %}
 <div class="steps"><b>Step 4 of 6:</b> Bank Details</div>
 <h2>Bank Details for Pension Disbursement</h2>
 <form method="post">
-  <label>Bank Account Number</label>
-  <input type="text" name="bank_account" value="{{ data.get('bank_account','') }}">
-  <label>IFSC Code</label>
-  <input type="text" name="ifsc" value="{{ data.get('ifsc','') }}">
+  <label for="bank_account">Bank Account Number</label>
+  <input type="text" id="bank_account" name="bank_account" inputmode="numeric" value="{{ data.get('bank_account','') }}">
+  <label for="ifsc">IFSC Code <span class="note">(11 characters, printed in the passbook, e.g. SBIN0003077)</span></label>
+  <input type="text" id="ifsc" name="ifsc" style="text-transform:uppercase" value="{{ data.get('ifsc','') }}">
   <p class="note">Pension will be credited by DBT to this account. Ensure the account
   is in the name of the applicant.</p>
   <p><button class="btn" type="submit">Save &amp; Continue</button></p>

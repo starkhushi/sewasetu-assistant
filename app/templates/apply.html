@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="steps"><b>Step 1 of 6:</b> Mobile Verification &rsaquo; Personal Details &rsaquo; Address &rsaquo; Bank Details &rsaquo; Document Upload &rsaquo; Declaration</div>
+{% set step = 1 %}{% include "_progress.html" %}
+<div class="steps"><b>Step 1 of 6:</b> Mobile Verification</div>
 <h2>Mobile Verification</h2>
+<p class="note">Use the applicant's own mobile number. An OTP will come to it by SMS, valid for 5 minutes.</p>
 <form method="post">
-  <label>Mobile Number</label>
-  <input type="text" name="mobile" maxlength="10" placeholder="10 digit mobile number">
-  <label>Security Check: What is {{ captcha_q }}?</label>
-  <input type="text" name="captcha" style="max-width:120px">
+  <label for="mobile">Mobile Number</label>
+  <input type="text" id="mobile" name="mobile" maxlength="10" inputmode="numeric" autocomplete="tel" placeholder="10 digit mobile number">
+  <label for="captcha">Security Check: What is {{ captcha_q }}?</label>
+  <input type="text" id="captcha" name="captcha" inputmode="numeric" style="max-width:140px">
   <p><button class="btn" type="submit">Send OTP</button></p>
 </form>
-<p class="note">An OTP will be sent to your mobile number by SMS. OTP is valid for 5 minutes.</p>
 {% endblock %}

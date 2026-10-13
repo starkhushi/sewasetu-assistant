@@ -1,28 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Dashboard</h2>
-<p><a href="/admin/applications?status=PENDING">Pending</a> |
-<a href="/admin/applications?status=APPROVED">Approved</a> |
-<a href="/admin/applications?status=REJECTED">Rejected</a> |
-<a href="/admin/applications?status=DEEMED_APPROVED">Deemed Approved</a> |
-<a href="/admin/applications?status=WITHDRAWN">Withdrawn</a> |
-<a href="/admin/tokens">Program tokens</a></p>
+{% set counts = dict(by_status) %}
+<h2>Officer desk</h2>
+<p class="note">Work the queue here, or through an <a href="/agents">AI assistant</a> signed in as you.</p>
 
-<h3>Applications by Status</h3>
-<table class="tbl" style="max-width:400px">
-{% for s, c in by_status %}
-<tr><td>{{ s }}</td><td style="text-align:right">{{ c }}</td></tr>
+<div class="grid" style="margin:16px 0 6px">
+  <a class="stat" href="/admin/applications?status=PENDING" style="text-decoration:none">
+    <div class="n">{{ counts.get('PENDING', 0) }}</div><div class="l">waiting for a decision</div></a>
+  <div class="stat {{ 'warn' if overdue else '' }}">
+    <div class="n">{{ overdue }}</div><div class="l">past the {{ sla }}-day limit (will be deemed approved)</div></div>
+  <div class="stat {{ 'warn' if open_complaints else '' }}">
+    <div class="n">{{ open_complaints }}</div><div class="l">open complaints from citizens</div></div>
+</div>
+
+<h3>Applications by status</h3>
+<p>
+{% for s in ['PENDING', 'APPROVED', 'DEEMED_APPROVED', 'REJECTED', 'WITHDRAWN'] %}
+  <a href="/admin/applications?status={{ s }}" style="text-decoration:none;margin-right:6px">
+    <span class="badge {{ s }}">{{ s.replace('_', ' ') }} &middot; {{ counts.get(s, 0) }}</span></a>
 {% endfor %}
-</table>
+</p>
 
-<h3 style="color:#a33">Pending beyond {{ sla }}-day SLA: {{ overdue }}</h3>
-<p class="note">Open complaints from citizens: <b>{{ open_complaints }}</b> &middot; Officers can also work the
-queue through an <a href="/agents">AI assistant</a>.</p>
-
-<h3>Pending by Block</h3>
-<table class="tbl" style="max-width:400px">
+<h3>Pending by block</h3>
+<table class="tbl" style="max-width:420px">
+<tr><th>Block</th><th style="text-align:right">Pending</th></tr>
 {% for b, c in by_block %}
 <tr><td>{{ b }}</td><td style="text-align:right">{{ c }}</td></tr>
+{% else %}
+<tr><td colspan="2" class="note">Nothing pending.</td></tr>
 {% endfor %}
 </table>
+
+<p style="margin-top:20px"><a href="/admin/tokens">Program tokens and connected applications</a></p>
 {% endblock %}

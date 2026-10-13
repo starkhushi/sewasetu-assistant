@@ -1,42 +1,74 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Application Status</h2>
-<table class="tbl" style="max-width:640px">
+<h2>Application {{ a[0] }}</h2>
+
+{% set st = a[8] %}
+<div class="banner {{ st }}" role="status">
+  {% if st == 'PENDING' %}
+    <b class="big">Waiting for the block officer</b>
+    Received on {{ a[9].strftime('%d %B %Y') }}. If no decision is made by
+    <b>{{ deemed.strftime('%d %B %Y') }}</b>, it is approved automatically by law.
+    Nothing more is needed from you now.
+  {% elif st in ('APPROVED', 'DEEMED_APPROVED') %}
+    <b class="big">Approved{% if st == 'DEEMED_APPROVED' %} automatically{% endif %}</b>
+    Rs. 250 a month{% if a[12] %}, payable from <b>{{ a[12].strftime('%B %Y') }}</b>{% endif %},
+    by bank transfer to the account ending <b>{{ a[6][-4:] }}</b> (IFSC {{ a[7] }}).
+    If the money has not come, check that this is your own open account, then tell the block office
+    or your AI assistant so a complaint is recorded.
+  {% elif st == 'REJECTED' %}
+    <b class="big">Not approved</b>
+    {% if reason %}Reason recorded by the officer: <b>{{ reason }}</b>.{% else %}No reason was recorded.{% endif %}
+    You may submit a new application once this is put right.
+  {% elif st == 'WITHDRAWN' %}
+    <b class="big">Withdrawn</b>
+    This application was withdrawn. You may submit a new one.
+  {% else %}
+    <b class="big">{{ st }}</b>
+  {% endif %}
+</div>
+
+{% if st in ('APPROVED', 'DEEMED_APPROVED') and a[13] %}
+<p class="note">Yearly life certificate due by <b>{{ a[13].strftime('%d %B %Y') }}</b>.</p>
+{% endif %}
+
+<table class="tbl" style="max-width:680px">
   <tr><th>Application No</th><td>{{ a[0] }}</td></tr>
   <tr><th>Applicant Name</th><td>{{ a[1] }}</td></tr>
   <tr><th>Mobile</th><td>{{ a[2] }}</td></tr>
-  <tr><th>Date of Birth</th><td>{{ a[3] }}</td></tr>
+  <tr><th>Date of Birth</th><td>{{ a[3].strftime('%d/%m/%Y') if a[3] else '' }}</td></tr>
   <tr><th>Village</th><td>{{ a[4] }}</td></tr>
   <tr><th>Block</th><td>{{ a[5] }}</td></tr>
   <tr><th>Bank Account</th><td>{{ a[6] }}</td></tr>
   <tr><th>IFSC</th><td>{{ a[7] }}</td></tr>
-  <tr><th>Status</th><td><b>{{ a[8] }}</b></td></tr>
-  <tr><th>Submitted</th><td>{{ a[9] }} {% if a[11] == 'AGENT' %}<i>(through your assistant)</i>{% endif %}</td></tr>
-  <tr><th>Decided</th><td>{{ a[10] or '-' }}</td></tr>
+  <tr><th>Status</th><td><span class="badge {{ st }}">{{ st.replace('_', ' ') }}</span></td></tr>
+  <tr><th>Submitted</th><td>{{ a[9].strftime('%d %b %Y, %H:%M') if a[9] else '' }} {% if a[11] == 'AGENT' %}<span class="badge AGENT">through your assistant</span>{% endif %}</td></tr>
+  <tr><th>Decided</th><td>{{ a[10].strftime('%d %b %Y, %H:%M') if a[10] else '-' }}</td></tr>
   {% if a[12] %}<tr><th>Pension payable from</th><td>{{ a[12] }}</td></tr>{% endif %}
   {% if a[13] %}<tr><th>Yearly life certificate due</th><td>{{ a[13] }}</td></tr>{% endif %}
 </table>
+<p style="margin-top:16px"><a class="btn btn-light btn-sm inline" href="/ack/{{ app_id }}.pdf">Download Acknowledgment (PDF)</a>
+&nbsp; <a href="/status/connections">Connected applications</a></p>
+
 {% if grievances %}
 <h3>Your complaints</h3>
-<table class="tbl" style="max-width:640px">
+<table class="tbl" style="max-width:680px">
 <tr><th>#</th><th>Kind</th><th>Raised</th><th>Status</th><th>Reply</th></tr>
 {% for gid, kind, detail, gstatus, raised, resolution in grievances %}
-<tr><td>{{ gid }}</td><td>{{ kind }}</td><td>{{ raised }}</td><td>{{ gstatus }}</td><td>{{ resolution or '-' }}</td></tr>
+<tr><td>{{ gid }}</td><td>{{ kind.replace('_', ' ').lower() }}</td><td>{{ raised.strftime('%d %b %Y') }}</td>
+  <td><span class="badge {{ 'ok' if gstatus == 'RESOLVED' else 'PENDING' }}">{{ gstatus }}</span></td><td>{{ resolution or '-' }}</td></tr>
 {% endfor %}
 </table>
 {% endif %}
-<p><a href="/ack/{{ app_id }}.pdf">Download Acknowledgment (PDF)</a> &middot;
-<a href="/status/connections">Connected applications</a></p>
-{% if a[8] == 'PENDING' %}
+
+{% if st == 'PENDING' %}
 <h3>Made a mistake?</h3>
 <p class="note">A pending application can be withdrawn. After withdrawing, you may
 submit a fresh application with the same mobile number.</p>
 <form method="post" action="/application/{{ app_id }}/withdraw"
       onsubmit="return confirm('Withdraw application {{ a[0] }}? This cannot be undone.');">
-  <button class="btn" style="background:#a33" type="submit">Withdraw this application</button>
+  <button class="btn btn-danger" type="submit">Withdraw this application</button>
 </form>
-{% elif a[8] in ('WITHDRAWN', 'REJECTED') %}
-<p class="note">This application is {{ a[8].lower() }}. You may
-<a href="/apply">submit a new application</a>.</p>
+{% elif st in ('WITHDRAWN', 'REJECTED') %}
+<p><a class="btn" href="/apply">Submit a new application</a></p>
 {% endif %}
 {% endblock %}

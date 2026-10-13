@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Document attached</h2>
-<p><b>{{ doc_name }}</b> is now attached to the application being prepared. You can go
-back to your assistant and continue. This link has been used and will not work again.</p>
+<div class="banner APPROVED" role="status">
+  <b class="big">Document attached</b>
+  <b>{{ doc_name }}</b> is now attached to the application being prepared.
+</div>
+<p>Go back to your assistant and tell it the document is uploaded. This link has been used and will
+not work again.</p>
 {% endblock %}

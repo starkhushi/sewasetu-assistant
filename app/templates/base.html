@@ -2,45 +2,153 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Sewa Setu - Old Age Pension Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Sewa Setu - Old Age Pension Portal{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f0f2f5;color:#222}
-.header{background:#0b3d6e;color:#fff;padding:14px 28px}
-.header h1{margin:0;font-size:22px}
-.header .sub{font-size:13px;color:#cfe0f3}
-.band{background:#f7931e;height:5px}
-.container{max-width:860px;margin:24px auto;background:#fff;padding:28px;
-border:1px solid #d7dbe0;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.btn{background:#0b3d6e;color:#fff;border:none;padding:10px 22px;font-size:15px;cursor:pointer}
-.btn:hover{background:#0d4a85}
-label{display:block;margin:12px 0 4px;font-weight:bold;font-size:14px}
-input[type=text],input[type=password],select{width:100%;max-width:420px;padding:8px;
-border:1px solid #aab;font-size:14px}
-.flash{background:#fdecea;border:1px solid #e57373;color:#a33;padding:10px 14px;margin:14px 0}
-.note{font-size:13px;color:#555}
-.footer{max-width:860px;margin:10px auto 40px;font-size:12px;color:#666;text-align:center}
-.footer a{color:#0b3d6e;margin:0 8px}
-table.tbl{border-collapse:collapse;width:100%}
-table.tbl td,table.tbl th{border:1px solid #ccd;padding:7px 10px;font-size:14px;text-align:left}
-.steps{font-size:13px;color:#777;margin-bottom:18px}
-.steps b{color:#0b3d6e}
+/* Written for old eyes on cheap phones: large type, big tap targets, strong contrast. */
+:root{
+  --navy:#0b3d6e; --navy-2:#0d4a85; --saffron:#f7931e; --green:#1b7e3c; --red:#b3261e;
+  --amber:#a15c00; --ink:#1d2329; --muted:#5b6670; --line:#d7dde3; --bg:#eef1f5; --card:#fff;
+  --soft-blue:#e8f0f9; --soft-green:#e6f4ea; --soft-red:#fcebea; --soft-amber:#fff4e0;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font-family:"Noto Sans",Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:var(--ink);
+  font-size:17px;line-height:1.55}
+a{color:var(--navy-2)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--saffron);outline-offset:2px}
+
+/* header */
+.header{background:var(--navy);color:#fff}
+.header .inner{max-width:960px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.mark{width:44px;height:44px;border-radius:50%;background:#fff;color:var(--navy);display:grid;place-items:center;
+  font-weight:700;font-size:16px;flex:none;border:3px solid var(--saffron)}
+.brand{flex:1;min-width:200px;text-decoration:none;color:#fff;display:flex;gap:12px;align-items:center}
+.brand h1{margin:0;font-size:21px;line-height:1.2}
+.brand .sub{font-size:13px;color:#cfe0f3}
+.nav{display:flex;gap:4px;flex-wrap:wrap}
+.nav a{color:#fff;text-decoration:none;font-size:15px;padding:8px 12px;border-radius:8px}
+.nav a:hover{background:rgba(255,255,255,.12)}
+.band{height:5px;background:linear-gradient(90deg,var(--saffron) 0 33%,#fff 33% 66%,var(--green) 66%)}
+
+/* page */
+.container{max-width:960px;margin:20px auto;background:var(--card);padding:28px;
+  border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+h2{color:var(--navy);margin:0 0 14px;font-size:26px;line-height:1.25}
+h3{color:var(--navy);margin:26px 0 10px;font-size:20px}
+.note{font-size:15px;color:var(--muted)}
+.footer{max-width:960px;margin:8px auto 40px;padding:0 16px;font-size:14px;color:var(--muted);text-align:center}
+.footer a{color:var(--navy);margin:0 8px;display:inline-block;padding:4px 0}
+
+/* forms */
+label{display:block;margin:16px 0 6px;font-weight:600;font-size:16px}
+input[type=text],input[type=password],input[type=number],select{width:100%;max-width:440px;padding:12px 14px;
+  border:1.5px solid #9aa6b2;border-radius:8px;font-size:17px;font-family:inherit;background:#fff;min-height:48px}
+input[type=file]{font-size:16px;padding:10px 0}
+input[type=checkbox]{width:22px;height:22px;vertical-align:middle;margin-right:8px}
+.btn{display:inline-block;background:var(--navy);color:#fff;border:none;padding:12px 26px;font-size:17px;
+  font-weight:600;font-family:inherit;border-radius:8px;cursor:pointer;min-height:48px;text-decoration:none;line-height:1.4}
+.btn:hover{background:var(--navy-2)}
+.btn-secondary{background:#4b5560}.btn-secondary:hover{background:#3a434c}
+.btn-danger{background:var(--red)}.btn-danger:hover{background:#962019}
+.btn-light{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}.btn-light:hover{background:var(--soft-blue)}
+.btn-sm{padding:7px 14px;min-height:38px;font-size:15px}
+.flash{background:var(--soft-red);border:1px solid #e8a19c;border-left:5px solid var(--red);color:#7a1b16;
+  padding:12px 16px;margin:0 0 18px;border-radius:8px}
+
+/* tables scroll sideways on small screens instead of breaking the page */
+table.tbl{border-collapse:collapse;width:100%;display:block;overflow-x:auto;max-width:100%}
+table.tbl tbody{display:table;width:100%}
+table.tbl td,table.tbl th{border:1px solid var(--line);padding:10px 12px;font-size:15px;text-align:left;vertical-align:top}
+table.tbl th{background:#f5f7fa;font-weight:600;color:#33404c}
+table.tbl tr:hover td{background:#fafcfe}
+
+/* building blocks */
+.card{border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;background:#fff}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))}
+.stat{border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;background:#fafbfd}
+.stat .n{font-size:30px;font-weight:700;color:var(--navy);line-height:1.1}
+.stat .l{font-size:14px;color:var(--muted)}
+.stat.warn .n{color:var(--red)}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;letter-spacing:.02em;
+  background:#e9edf1;color:#33404c;white-space:nowrap}
+.badge.PENDING{background:var(--soft-amber);color:var(--amber)}
+.badge.APPROVED,.badge.DEEMED_APPROVED,.badge.ok{background:var(--soft-green);color:var(--green)}
+.badge.REJECTED,.badge.fail{background:var(--soft-red);color:var(--red)}
+.badge.WITHDRAWN{background:#eceff2;color:#4b5560}
+.badge.AGENT{background:var(--soft-blue);color:var(--navy)}
+.banner{border-radius:var(--radius);padding:16px 18px;margin:0 0 20px;border-left:6px solid}
+.banner b.big{display:block;font-size:20px;margin-bottom:4px}
+.banner.PENDING{background:var(--soft-amber);border-color:var(--saffron)}
+.banner.APPROVED,.banner.DEEMED_APPROVED{background:var(--soft-green);border-color:var(--green)}
+.banner.REJECTED{background:var(--soft-red);border-color:var(--red)}
+.banner.WITHDRAWN{background:#f0f2f4;border-color:#7a858f}
+code,pre{font-family:ui-monospace,Consolas,monospace;font-size:14px}
+pre.code{background:#0f1b2a;color:#e6edf5;padding:14px;border-radius:8px;overflow-x:auto;white-space:pre}
+
+/* step progress for the application form */
+.progress{display:flex;gap:6px;margin:0 0 22px;padding:0;list-style:none;counter-reset:s}
+.progress li{flex:1;text-align:center;font-size:12px;color:var(--muted);position:relative;padding-top:38px;min-width:0}
+.progress li::before{counter-increment:s;content:counter(s);position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:30px;height:30px;border-radius:50%;background:#e2e7ec;color:#5b6670;display:grid;place-items:center;font-weight:700;font-size:14px}
+.progress li::after{content:"";position:absolute;top:14px;left:calc(50% + 18px);right:calc(-50% + 18px);height:3px;background:#e2e7ec}
+.progress li:last-child::after{display:none}
+.progress li.done::before{background:var(--green);color:#fff;content:"\2713"}
+.progress li.done::after{background:var(--green)}
+.progress li.now{color:var(--navy);font-weight:700}
+.progress li.now::before{background:var(--navy);color:#fff;box-shadow:0 0 0 4px var(--soft-blue)}
+.steps{font-size:15px;color:var(--muted);margin-bottom:6px}
+.steps b{color:var(--navy)}
+
+@media (max-width:640px){
+  body{font-size:16px}
+  .container{margin:0;border-radius:0;border-left:none;border-right:none;padding:20px 16px}
+  h2{font-size:22px}
+  .grid{grid-template-columns:1fr}
+  .brand h1{font-size:18px}
+  .brand .sub{font-size:12px}
+  main,.container{overflow-wrap:anywhere}
+  .nav{width:100%}
+  .nav a{padding:6px 10px;font-size:14px}
+  .progress li{font-size:0}
+  .progress li.now{font-size:12px}
+  .btn{width:100%;text-align:center}
+  .btn.btn-sm,.btn.inline{width:auto}
+}
+{% block extra_css %}{% endblock %}
 </style>
 </head>
 <body>
-<div class="header">
-  <h1>Sewa Setu &mdash; Old Age Pension Portal</h1>
-  <div class="sub">Department of Social Welfare &middot; Government of Purvanchal</div>
-</div>
-<div class="band"></div>
-<div class="container">
+<header class="header">
+  <div class="inner">
+    <a class="brand" href="/">
+      <span class="mark" aria-hidden="true">SS</span>
+      <span><h1>Sewa Setu</h1><span class="sub">Old Age Pension &middot; Department of Social Welfare, Government of Purvanchal</span></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/apply">Apply</a>
+      <a href="/status">My application</a>
+      <a href="/agents">AI assistants</a>
+      {% if session.get('admin') %}<a href="/admin/dashboard">Officer desk</a>{% endif %}
+    </nav>
+  </div>
+</header>
+<div class="band" aria-hidden="true"></div>
+<main class="container">
 {% with messages = get_flashed_messages() %}
-  {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+  {% for m in messages %}<div class="flash" role="alert">{{ m }}</div>{% endfor %}
 {% endwith %}
 {% block content %}{% endblock %}
-</div>
-<div class="footer">
-  <a href="/">Home</a> | <a href="/about">About the Scheme</a> | <a href="/status">Application Status</a><br>
+</main>
+<footer class="footer">
+  <a href="/">Home</a> <a href="/about">About the Scheme</a> <a href="/status">Application Status</a>
+  <a href="/agents">Apply with an AI assistant</a> <a href="/admin">Officer login</a><br>
   Department of Social Welfare, Government of Purvanchal.
-</div>
+</footer>
 </body>
 </html>
