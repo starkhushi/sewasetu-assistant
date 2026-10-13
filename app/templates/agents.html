@@ -38,12 +38,15 @@ you. <b>You just talk to it</b>, the way you would talk to someone at the counte
     <span class="link-box"><code id="clink">{{ citizen_url }}</code>
       <button class="btn btn-sm btn-light inline" type="button" onclick="copyText('clink', this)">Copy link</button></span></span></li>
   <li><span class="num">2</span><span><b>Sign in with your mobile number</b>
-    <span class="t">This website opens. Type the applicant's mobile number and the OTP that comes by SMS,
-    then press Allow. The assistant never sees the OTP.</span></span></li>
+    <span class="t">This website opens. Type the applicant's mobile number and the OTP, then press Allow.
+    This is how the portal knows whose application it is. The assistant never sees the OTP, and the
+    sign-in lasts 2 hours.</span></span></li>
   <li><span class="num">3</span><span><b>Just talk</b>
     <span class="t">Say what you need, in your own words. The assistant asks one question at a time
     and reads everything back before sending.</span></span></li>
 </ol>
+<p class="note">On this demo portal the OTP is not sent to a real phone; read it in the
+<a href="/__gateway/" target="_blank" rel="noopener">SMS inbox</a>.</p>
 
 <h3>What it looks like</h3>
 <div class="chat" aria-label="Example conversation">
@@ -82,8 +85,16 @@ you. <b>You just talk to it</b>, the way you would talk to someone at the counte
 the counter. You can see it under <a href="/status">My application</a>, and end the assistant's
 sign-in any time from <a href="/status/connections">Connected applications</a>.</p>
 
-<p class="note"><b>Block officers</b> have their own assistant to see the queue and record decisions.
-Its link is in the technical details below.</p>
+<div class="card" style="margin-top:22px">
+  <h3 style="margin-top:0">For block officers</h3>
+  <p style="margin:0 0 6px">Officers have their own assistant: it shows what is waiting, opens a case, and records
+  approve or reject in your name. Add this link instead, and sign in with your departmental username
+  and password (no OTP):</p>
+  <span class="link-box"><code id="olink">{{ officer_url }}</code>
+    <button class="btn btn-sm btn-light inline" type="button" onclick="copyText('olink', this)">Copy link</button></span>
+  <p class="note" style="margin:10px 0 0">Then ask, for example: "What is waiting for me?", "Show me the oldest case",
+  "Approve it", or "Reject it, age proof not legible".</p>
+</div>
 
 <details class="tech">
   <summary>For technical people</summary>

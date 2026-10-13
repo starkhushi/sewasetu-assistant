@@ -4,6 +4,7 @@
 <div class="steps"><b>Step 1 of 6:</b> Mobile Verification</div>
 <h2>Enter OTP</h2>
 <p class="note">An OTP has been sent to <b>{{ mobile }}</b>. It can take a few seconds to arrive.</p>
+{% include "_demo_sms.html" %}
 <form method="post">
   <label for="otp">OTP</label>
   <input type="text" id="otp" name="otp" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="max-width:180px;letter-spacing:.2em;font-size:20px">

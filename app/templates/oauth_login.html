@@ -13,6 +13,7 @@ Sign in to continue. {% if role == 'citizen' %}<b>Enter the OTP only on this pag
   {% else %}
   <form method="post">
     <p class="note">An OTP has been sent to {{ pending_mobile }}.</p>
+    {% include "_demo_sms.html" %}
     <label>OTP</label>
     <input type="text" name="otp" maxlength="6" style="max-width:160px">
     <p><button class="btn" type="submit">Verify</button></p>
