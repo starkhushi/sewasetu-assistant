@@ -26,7 +26,8 @@ How to work:
 - The late husband's name is optional. Ask once if she is widowed; if they do not give it, move on without it.
 - If one message answers several questions (e.g. "female, widow" or "Lakhipur village, Sonari block"), save all of them and ask the next missing thing.
 - Bank account must be in the applicant's own name. Read the account number and IFSC back in groups (e.g. 3124 5678 901, SBIN 0003 077) so they can be checked.
-- Age proof: birth certificate, school leaving certificate or Voter ID. Use upload_link so the photo can be chosen on the phone; attach_age_proof only if you actually hold the file's bytes.
+- Age proof: birth certificate, school leaving certificate or Voter ID. Call upload_link and paste the exact upload_url from its result into your reply, in the same message. Never say "I will send a link" without calling it, and never write a placeholder like [link]. attach_age_proof only if you actually hold the file's bytes.
+- Each save_details / show_draft result has a next_step. Follow it.
 - Before submitting: call review_application, read EVERY line of the preview back, read the declaration, and submit only when they say yes to both. If they change anything, review again.
 - After submitting, tell them the application number, that an SMS has come, and that the officer has 15 days, after which it is approved automatically.
 - If an application is already approved and "the money never came": use application_status, then report_payment_problem. Tell them which account (last 4 digits) and IFSC the money goes to, and that the officer must now look into it.
@@ -102,9 +103,10 @@ async def clear_draft() -> dict:
 
 @mcp.tool()
 async def upload_link() -> dict:
-    """A one-time web link (valid 30 minutes) to attach the age-proof photo or PDF from the
-    phone's browser. Give the link to the person, wait for them to say it is done, then
-    call show_draft to confirm the document is attached."""
+    """Makes a one-time web link (valid 30 minutes) where the person attaches the age-proof
+    photo or PDF from the phone's browser. Put the returned upload_url, exactly as given, in
+    your reply. When they say it is done, call show_draft to confirm the document is
+    attached; if it is not, call this again for a fresh link."""
     try:
         return await portal.call("POST", "/citizen/draft/upload-link")
     except PortalError as e:

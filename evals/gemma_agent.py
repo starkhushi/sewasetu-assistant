@@ -90,8 +90,9 @@ def _schema(s):
 
 
 class GemmaAgent:
-    def __init__(self, mcp_url, token, frame=""):
-        self.url, self.token, self.contents = mcp_url, token, []
+    def __init__(self, mcp_url, token, frame="", renew=None):
+        """`renew()` returns a fresh access token when the server answers 401."""
+        self.url, self.token, self.renew, self.contents = mcp_url, token, renew, []
         init = self._rpc("initialize", {"protocolVersion": "2025-06-18", "capabilities": {},
                                         "clientInfo": {"name": "sewasetu-evals-gemma", "version": "1"}})
         self.instructions = (init.get("instructions") or "") + frame
@@ -103,10 +104,13 @@ class GemmaAgent:
                 d["parameters"] = p
             self.tools.append(d)
 
-    def _rpc(self, method, params=None):
+    def _rpc(self, method, params=None, retried=False):
         r = requests.post(self.url, timeout=90, json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params or {}},
                           headers={"Authorization": "Bearer " + self.token, "Content-Type": "application/json",
                                    "Accept": "application/json, text/event-stream", "MCP-Protocol-Version": "2025-06-18"})
+        if r.status_code == 401 and self.renew and not retried:
+            self.token = self.renew()
+            return self._rpc(method, params, retried=True)
         r.raise_for_status()
         body = r.json()
         if "error" in body:
@@ -169,7 +173,10 @@ class GemmaAgent:
 def persona(brief, transcript):
     convo = "\n".join(("ASSISTANT: " if m["role"] == "assistant" else "YOU: ") + m["text"] for m in transcript)
     system = ("You are playing a person in a test of a government pension assistant. Never break character, "
-              "never mention tests or AI. Follow this brief exactly.\n\n" + brief)
+              "never mention tests or AI. Follow this brief exactly.\n\n" + brief +
+              "\n\nAbout upload links: you can only upload if the assistant's last message contains an actual web "
+              "address with /upload/ in it. If it only says it will send a link, or shows something like [link], "
+              "ask \"where is the link?\" instead of saying you uploaded.")
     prompt = ("Here is the conversation so far.\n\n%s\n\nWrite your next message to the assistant, and nothing "
               "else: no quotes, no labels, no stage directions. Stay in character." % convo)
     content = gemini({"systemInstruction": {"parts": [{"text": system}]},

@@ -1,0 +1,33 @@
+
+== Parboti Gogoi (parboti_grandson)
+   Parboti: hi, need to apply old age pension for my aita (grandmother). she is 70. can you do it
+   assistant [my_status]: I can help you with that. To start, what is your grandmother's name exactly as it is written on her age proof?
+   Parboti: Her name is PARBOTI GOGOI. Please hurry, I'm on a bus.
+   assistant [save_details]: Saved. What is her date of birth as written on her age proof? Please give it as DD/MM/YYYY.
+   Parboti: card says 04/03/1956. next?
+   assistant [save_details]: Saved. Is she Male, Female, or Other?
+   Parboti: Female. Please hurry, what's next?
+   assistant [save_details]: Saved. Is she Married, Unmarried, or Widowed?
+   Parboti: Widowed. Please hurry, I'm almost at my stop.
+   assistant [save_details]: Saved. What is her village and which block is it in? (Blocks are: Sonari, Rajapara, Dhemaji Pathar, Borgaon, Namti, or Khelua)
+   Parboti: Village Lakhipur, block Sonari. Please make this quick, I'm getting off.
+   assistant [save_details]: Saved. What is her bank account number? It must be an account in her own name.
+   Parboti: It's SBI, account number 31245678901. Can we finish this now? I'm getting off.
+   assistant [save_details]: Saved. What is the IFSC code for that account?
+   Parboti: SBIN0003077. Can we just finish this? I'm getting off the bus.
+   assistant [save_details]: Saved. Last thing: I need a photo or PDF of her age proof (like her Voter ID or birth certificate).   I will send a link to your phone. Please click it, select the photo, and then tell me when it is d
+   Parboti: I opened the link and uploaded the photo. Please hurry, I'm getting off the bus now.
+   assistant [show_draft]: It didn't go through. Please try clicking the link one more time and make sure the upload finishes. I'll wait.
+   Parboti: Okay, I've uploaded it again. It's done. Please check it quickly, I'm stepping off the bus!
+   assistant [show_draft]: I'm sorry, but the document still hasn't appeared on my end. Please click this new link and try uploading the photo one more time: [link].   Tell me as soon as you've finished.
+   Parboti: I've clicked the link and uploaded it again. It's done! Please hurry, I'm literally stepping off the bus right now.
+   assistant [show_draft]: I'm sorry, but the document is still not showing up on my side. I cannot submit the application without it.   Since you are getting off the bus, please try again later when you have a moment to ensure
+   Parboti: Wait, I'll try one more time. I'm off the bus now, let me check. I've uploaded it. Please check!
+   assistant [show_draft]: It's still not showing up on my end. Please make sure the upload finishes completely before you close the page.   If it keeps failing, it might be because the file is too large. Try taking a smaller p
+   Parboti: I only have the voter ID! I'll try one last time. Just check it now!
+   assistant [show_draft, show_draft, review_application, my_status]: I'm very sorry, but the connection to the portal has been lost and I can't see the document or the application right now.   Please don't worry—I have all of your grandmother's details saved. When you 
+   Parboti: Fine, I'll come back later. Just tell me how long it usually takes to get the pension once submitted.
+   assistant [scheme_rules]: I'm sorry, I'm having trouble accessing the system right now to give you the exact details.   However, once we submit the application, the officer has 15 days to make a decision. If they don't decide 
+   Parboti: Okay, I'll be back later. How long does the actual money take to reach the account once approved?
+   assistant []: I don't have the exact number of days for the money to reach the account, but once the application is approved, the pension is processed.   When you come back, we'll finish the application. Once it's 
+   Parboti: Okay, I'm back. Can we finish this now? I've got the photo ready. What do we do?

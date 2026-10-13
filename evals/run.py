@@ -34,7 +34,7 @@ import requests
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from signin import sign_in, PORTAL  # noqa: E402
+from signin import sign_in, refresh, PORTAL  # noqa: E402
 import db  # noqa: E402
 from gemma_agent import GemmaAgent, persona as gemma_persona  # noqa: E402
 
@@ -206,7 +206,7 @@ def play(persona, defaults, cur):
     workdir = tempfile.mkdtemp(prefix="sewasetu-eval-")
     agent = None
     if ASSISTANT == "gemma":
-        agent = GemmaAgent(url, tok["access_token"], frame=ASSISTANT_FRAME_GEMMA)
+        agent = GemmaAgent(url, tok["access_token"], frame=ASSISTANT_FRAME_GEMMA, renew=lambda: refresh(tok))
     else:
         with open(os.path.join(workdir, "mcp.json"), "w") as fh:
             json.dump({"mcpServers": {"sewasetu": {"type": "http", "url": url,

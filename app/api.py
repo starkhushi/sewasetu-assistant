@@ -258,6 +258,25 @@ def _draft_view(cur, mobile, data, doc_path):
         out["problems"] = out["problems"] + [
             "this mobile already has application %s (%s); a second one cannot be made while it is live"
             % (live[1], live[2])]
+    # One concrete next step. Small models follow this far better than general rules
+    # (an eval caught Gemma promising "I will send a link" without ever making one).
+    labels = {"applicant_name": "the name as on the age proof", "dob": "the date of birth (DD/MM/YYYY)",
+              "village": "the village", "block": "the block", "bank_account": "the bank account number",
+              "ifsc": "the IFSC"}
+    fields_missing = [k for k in missing if k != "age_proof_document"]
+    if live:
+        out["next_step"] = "Explain the existing application instead; do not start a new one."
+    elif fields_missing:
+        out["next_step"] = "Ask for %s." % labels[fields_missing[0]]
+    elif not doc_path:
+        out["next_step"] = ("Call the upload_link tool now and put the exact upload_url it returns in your reply. "
+                            "Never promise a link without calling it, and never write a placeholder like [link]. "
+                            "If the person says they uploaded but age_proof_document is still empty, they did "
+                            "not use a working link: call upload_link again and give the new link.")
+    elif out["ready_to_review"]:
+        out["next_step"] = "Call review_application and read the whole preview and the declaration back."
+    else:
+        out["next_step"] = "Explain the problems listed and ask for the corrected detail."
     return out
 
 

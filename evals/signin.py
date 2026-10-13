@@ -85,7 +85,20 @@ def sign_in(resource, role, mobile=None, username="admin", password=None):
                                               "client_id": client_id, "code_verifier": verifier,
                                               "redirect_uri": REDIRECT, "resource": resource})
     r.raise_for_status()
-    return r.json()
+    tok = r.json()
+    tok.update(client_id=client_id, resource=resource)
+    return tok
+
+
+def refresh(tok):
+    """Rotate the refresh token for a fresh access token, as any OAuth client does when the
+    20-minute citizen access token runs out. Updates `tok` in place; raises if the
+    session itself has ended."""
+    r = requests.post(PORTAL + "/oauth/token", data={"grant_type": "refresh_token", "refresh_token": tok["refresh_token"],
+                                                     "client_id": tok["client_id"], "resource": tok["resource"]})
+    r.raise_for_status()
+    tok.update(r.json())
+    return tok["access_token"]
 
 
 if __name__ == "__main__":
