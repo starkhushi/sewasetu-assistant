@@ -1,0 +1,39 @@
+# Production overlay: HTTPS in front of everything on one domain.
+#
+#   DOMAIN=sewasetu.example.in PUBLIC_BASE_URL=https://sewasetu.example.in \
+#   ADMIN_PASSWORD=... docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+#
+# The MCP servers' public URLs follow from PUBLIC_BASE_URL (same host, /mcp/citizen and
+# /mcp/officer) and are set in the base compose file from it.
+services:
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - mcp-citizen
+      - mcp-officer
+
+  app:
+    ports: !override
+      - "127.0.0.1:8000:8000"
+
+  mcp-citizen:
+    ports: !override
+      - "127.0.0.1:8101:8101"
+
+  mcp-officer:
+    ports: !override
+      - "127.0.0.1:8102:8102"
+
+volumes:
+  caddy_data:
+  caddy_config:

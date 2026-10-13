@@ -1,0 +1,20 @@
+# One domain for the portal and both MCP servers. Caddy fetches and renews the
+# certificate itself. The MCP paths and their RFC 9728 metadata go to the right
+# server; everything else is the portal.
+{$DOMAIN} {
+	encode gzip
+
+	@citizen path /mcp/citizen /mcp/citizen/* /.well-known/oauth-protected-resource/mcp/citizen*
+	handle @citizen {
+		reverse_proxy mcp-citizen:8101
+	}
+
+	@officer path /mcp/officer /mcp/officer/* /.well-known/oauth-protected-resource/mcp/officer*
+	handle @officer {
+		reverse_proxy mcp-officer:8102
+	}
+
+	handle {
+		reverse_proxy app:8000
+	}
+}
