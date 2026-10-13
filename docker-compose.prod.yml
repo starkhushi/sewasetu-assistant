@@ -8,6 +8,7 @@
 services:
   caddy:
     image: caddy:2
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
@@ -23,16 +24,28 @@ services:
       - mcp-officer
 
   app:
+    restart: unless-stopped
     ports: !override
       - "127.0.0.1:8000:8000"
 
   mcp-citizen:
+    restart: unless-stopped
     ports: !override
       - "127.0.0.1:8101:8101"
 
   mcp-officer:
+    restart: unless-stopped
     ports: !override
       - "127.0.0.1:8102:8102"
+
+  db:
+    restart: unless-stopped
+
+  smsgw:
+    restart: unless-stopped
+
+  scheduler:
+    restart: unless-stopped
 
 volumes:
   caddy_data:
