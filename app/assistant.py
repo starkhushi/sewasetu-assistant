@@ -34,12 +34,14 @@ assistant = Blueprint("assistant", __name__)
 CLIENT_ID = "sewasetu-web-assistant"
 CLIENT_NAME = "Sewa Setu chat assistant (Gemma)"
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMMA_MODEL = os.environ.get("GEMMA_MODEL", "gemma-4-26b-a4b-it")
+# Each model has its own free-tier quota; when one is at its per-minute limit, use the other.
+GEMMA_MODELS = [m.strip() for m in os.environ.get("GEMMA_MODELS", "gemma-4-26b-a4b-it,gemma-4-31b-it").split(",") if m.strip()]
+KEEP_TOOL_RESULTS = 3   # older tool results are shortened in the history sent to the model
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent"
 MCP_PUBLIC = os.environ.get("MCP_CITIZEN_URL", "http://localhost:8101/mcp/citizen").rstrip("/")
 MCP_INTERNAL = os.environ.get("MCP_CITIZEN_INTERNAL_URL", MCP_PUBLIC).rstrip("/")
 SELF_URL = os.environ.get("PORTAL_SELF_URL", "http://127.0.0.1:8000").rstrip("/")
-MAX_STEPS = 10          # model calls per message from the person
+MAX_STEPS = 16          # model calls (and busy retries) per message from the person
 
 WEB_FRAME = """
 
@@ -268,20 +270,55 @@ def _call_tool(token, name, args):
 # the loop, one step per request
 # ---------------------------------------------------------------------------
 
+def _compact(contents):
+    """The free tier limits tokens per minute, and every call carries the whole history.
+    Keep the last few tool results whole; older ones shrink to a stub (the model has
+    already turned them into words in its replies)."""
+    seen, out = 0, []
+    for c in reversed(contents):
+        parts = c.get("parts", [])
+        if any("functionResponse" in p for p in parts):
+            seen += 1
+            if seen > KEEP_TOOL_RESULTS:
+                c = {"role": c["role"], "parts": [
+                    {"functionResponse": dict(p["functionResponse"], response={"note": "earlier result, already used"})}
+                    if "functionResponse" in p else p for p in parts]}
+        out.append(c)
+    return list(reversed(out))
+
+
+class Busy(Exception):
+    def __init__(self, wait):
+        self.wait = wait
+
+
 def _gemma(contents, tools, instructions):
     body = {"systemInstruction": {"parts": [{"text": instructions + WEB_FRAME % datetime.now().strftime("%d %B %Y")}]},
-            "contents": contents, "tools": [{"functionDeclarations": tools}],
+            "contents": _compact(contents), "tools": [{"functionDeclarations": tools}],
             "generationConfig": {"temperature": 0.3}}
-    for attempt in range(3):
-        r = requests.post(GEMINI_URL % GEMMA_MODEL, json=body, timeout=90,
-                          headers={"x-goog-api-key": GEMINI_API_KEY})
-        if r.status_code in (429, 500, 503) and attempt < 2:
-            time.sleep(2 + 3 * attempt)
+    # The key goes in the query string: AI Studio's newer "AQ." keys are refused in the
+    # x-goog-api-key header. Transient 500s get one quick retry; a 429 moves to the next model.
+    wait = 5
+    for model in GEMMA_MODELS:
+        for attempt in range(2):
+            r = requests.post(GEMINI_URL % model, params={"key": GEMINI_API_KEY}, json=body, timeout=90)
+            if r.status_code == 200:
+                break
+            portal.app.logger.warning("gemini %s %s: %s" % (model, r.status_code, r.text[:200]))
+            if r.status_code in (500, 503) and attempt == 0:
+                time.sleep(2)
+                continue
+            break
+        if r.status_code == 200:
+            break
+        if r.status_code == 429:
+            m = re.search(r'"retryDelay":\s*"(\d+)', r.text)
+            wait = min(int(m.group(1)) if m else 10, 30)
             continue
-        break
+        if r.status_code not in (500, 503):
+            raise RuntimeError("model error %d" % r.status_code)
     if r.status_code != 200:
-        portal.app.logger.error("gemini %s: %s" % (r.status_code, r.text[:300]))
-        raise RuntimeError("busy" if r.status_code in (429, 503) else "model error %d" % r.status_code)
+        raise Busy(wait)
     cands = r.json().get("candidates") or []
     if not cands or not cands[0].get("content"):
         return {"role": "model", "parts": [{"text": "Sorry, I could not answer that. Could you say it another way?"}]}
@@ -341,6 +378,7 @@ def _run(first_text=None):
         chat["contents"].append({"role": "user", "parts": [{"text": first_text}]})
         chat["display"].append({"role": "user", "text": first_text})
         chat["steps"] = 0
+    wait = 0
     try:
         if chat["steps"] >= MAX_STEPS:
             chat["display"].append({"role": "assistant", "text": "Sorry, that took too many steps. Could you tell me again, more simply?"})
@@ -348,13 +386,14 @@ def _run(first_text=None):
         else:
             chat["steps"] += 1
             done, label = _step(chat)
-    except RuntimeError as e:
-        msg = ("The assistant is busy right now. Please wait a few seconds and send your message again."
-               if str(e) == "busy" else "Something went wrong on our side. Please try again.")
-        chat["display"].append({"role": "assistant", "text": msg})
+    except Busy as b:
+        # nothing was added to the history; the browser waits and asks again
+        done, label, wait = False, "Busy, trying again in a few seconds", b.wait
+    except RuntimeError:
+        chat["display"].append({"role": "assistant", "text": "Something went wrong on our side. Please try again."})
         done, label = True, None
     _save(chat)
-    return jsonify({"done": done, "status": label, "display": chat["display"],
+    return jsonify({"done": done, "status": label, "wait": wait, "display": chat["display"],
                     "signed_in": bool(chat["refresh_token"] or (chat["token_exp"] and chat["token_exp"] > datetime.now()))})
 
 

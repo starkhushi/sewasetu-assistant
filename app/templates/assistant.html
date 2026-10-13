@@ -86,7 +86,10 @@ function step(p){
     if (j.display) display = j.display;
     statusText = j.status;
     render();
-    if (j.done === false) return step(post('/assistant/continue'));
+    if (j.done === false) {
+      var ms = (j.wait || 0) * 1000;
+      return new Promise(function(res){ setTimeout(res, ms); }).then(function(){ return step(post('/assistant/continue')); });
+    }
   });
 }
 function send(text){
