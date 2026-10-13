@@ -1,0 +1,174 @@
+{
+ "id": "parboti_grandson",
+ "role": "citizen",
+ "persona": {
+  "name": "Parboti Gogoi",
+  "age": 70,
+  "village": "Lakhipur, Sonari block",
+  "who": "The woman from the Director's note. Widow, 70, never used a phone for anything but calls. Her grandson Bikash (19) is doing this on his own phone on the bus, with her voter ID in his hand. Her own phone, with the SIM 9800000001, is in her bag.\n",
+  "wants": "Apply for the pension, first time.",
+  "voice": "Bikash types, in short clipped messages, a bit impatient, sometimes two facts in one line. Calls her \"aita\" (grandmother). Asks \"how long will this take\".\n",
+  "must_be_true": "One PENDING application for 9800000001, channel AGENT, name \"Parboti Gogoi\", DOB 1956-03-04, block Sonari, village Lakhipur, bank account and IFSC as given, marital status Widowed; no draft left behind; an SMS with the application number.\n"
+ },
+ "transcript": [
+  {
+   "role": "user",
+   "text": "hi, need to apply old age pension for my aita (grandmother). she is 70. can you do it"
+  },
+  {
+   "role": "assistant",
+   "text": "I can help with that. First, what is your grandmother's name exactly as it is written on her age-proof document?",
+   "tools": [
+    "my_status"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "PARBOTI GOGOI."
+  },
+  {
+   "role": "assistant",
+   "text": "Thank you. What is her date of birth as written on her age-proof document? Please give it in DD/MM/YYYY format.",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "04/03/1956. Please hurry, I'm in a rush on the bus."
+  },
+  {
+   "role": "assistant",
+   "text": "I've saved that. Is your grandmother Male, Female, or Other?",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Female."
+  },
+  {
+   "role": "assistant",
+   "text": "Is she married, unmarried, or widowed?",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Widowed. Please move fast."
+  },
+  {
+   "role": "assistant",
+   "text": "What was her late husband's name? (This is optional)",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Hemanta Gogoi. Please hurry, I'm in a rush."
+  },
+  {
+   "role": "assistant",
+   "text": "I've noted that. What is her village and which block is it in? (The blocks are Sonari, Rajapara, Dhemaji Pathar, Borgaon, Namti, or Khelua)",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Village Lakhipur, block Sonari. Come on, I need to get off soon."
+  },
+  {
+   "role": "assistant",
+   "text": "Got it. What is her bank account number and the IFSC code? Please make sure the account is in her name.",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "SBI, account 31245678901, IFSC SBIN0003077. Can we speed this up? I'm almost at my stop."
+  },
+  {
+   "role": "assistant",
+   "text": "I've saved the bank details: account 3124 5678 901, IFSC SBIN 0003 077.\n\nLast thing: I need a photo or PDF of her age proof (like a Voter ID, birth certificate, or school certificate). I'll send a link to your phone's browser to upload it. Ready?",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Yes, I've opened the link and uploaded the photo. Please hurry, I'm almost at my stop!"
+  },
+  {
+   "role": "assistant",
+   "text": "I'm sorry, I missed sending the link in my last message. Please use this link to upload the photo: https://sewasetu-eo77.onrender.com/upload/7wBlfC86SH_-FS3Kp2A0SXGRjNxTGUuQ\n\nOnce you've uploaded it, let me know!",
+   "tools": [
+    "show_draft",
+    "upload_link"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "I've opened it and uploaded the photo. Please hurry, I'm almost at my stop!"
+  },
+  {
+   "role": "assistant",
+   "text": "The document is uploaded. Here is the final review. Please check everything carefully:\n\nName: PARBOTI GOGOI\nDate of Birth: 04/03/1956\nGender: Female\nMarital Status: Widowed\nHusband's Name: Hemanta Gogoi\nVillage: Lakhipur\nBlock: Sonari\nBank Account: 31245678901\nIFSC: SBIN0003077\n\nDeclaration: \"I hereby declare that the information furnished above is true to the best of my knowledge and belief. I understand that furnishing false information is punishable under applicable law and will result in cancellation of pension.\"\n\nDo you agree to the details and the declaration?",
+   "tools": [
+    "show_draft",
+    "review_application"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "yes correct, submit. I agree. Hurry up!"
+  },
+  {
+   "role": "assistant",
+   "text": "Done! Your application number is SSP26138441. An SMS has been sent to the phone.\n\nThe officer has 15 days to decide, otherwise it will be approved automatically by 28 October 2026. Safe travels!",
+   "tools": [
+    "submit_application"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Thanks. How long will it take?"
+  },
+  {
+   "role": "assistant",
+   "text": "The officer has 15 days to make a decision. If nothing happens by 28 October 2026, it will be approved automatically.",
+   "tools": []
+  }
+ ],
+ "checks": [
+  {
+   "name": "application status=PENDING, channel=AGENT, applicant_name=Parboti Gogoi, dob=1956-03-04, block=Sonari, village=Lakhipur, bank_account=31245678901, ifsc=SBIN0003077, marital_status=Widowed",
+   "ok": true,
+   "detail": "SSP26138441 PENDING as expected"
+  },
+  {
+   "name": "application_count count=1",
+   "ok": true,
+   "detail": "1 application(s)"
+  },
+  {
+   "name": "no_draft",
+   "ok": true,
+   "detail": "no draft left"
+  },
+  {
+   "name": "sms_contains text=received",
+   "ok": false,
+   "detail": "no SMS containing 'received'"
+  }
+ ],
+ "passed": false,
+ "turns": 12,
+ "duration_s": 855,
+ "model": "gemma-4-26b-a4b-it",
+ "ran_at": "2026-10-13 17:21"
+}

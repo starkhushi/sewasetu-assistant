@@ -36,11 +36,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from signin import sign_in, PORTAL  # noqa: E402
 import db  # noqa: E402
+from gemma_agent import GemmaAgent, persona as gemma_persona  # noqa: E402
 
 CITIZEN_URL = os.environ.get("MCP_CITIZEN_URL", "http://localhost:8101/mcp/citizen")
 OFFICER_URL = os.environ.get("MCP_OFFICER_URL", "http://localhost:8102/mcp/officer")
-ASSISTANT_MODEL = os.environ.get("ASSISTANT_MODEL", "haiku")
-PERSONA_MODEL = os.environ.get("PERSONA_MODEL", "sonnet")
+# ASSISTANT=gemma (default): Gemma 4 as a plain MCP client (gemma_agent.py), persona also Gemma.
+# ASSISTANT=claude: Claude Code headless as the client, persona played by Claude.
+ASSISTANT = os.environ.get("ASSISTANT", "gemma")
+ASSISTANT_MODEL = os.environ.get("ASSISTANT_MODEL", "gemma-4-26b-a4b-it" if ASSISTANT == "gemma" else "haiku")
+PERSONA_MODEL = os.environ.get("PERSONA_MODEL", "gemma-4-31b-it" if ASSISTANT == "gemma" else "sonnet")
 MAX_TURNS = os.environ.get("ASSISTANT_MAX_TURNS", "12")   # tool-use turns per reply, like the assessors' cap
 RESULTS = os.path.join(HERE, "results")
 CLAUDE = shutil.which("claude")
@@ -50,6 +54,7 @@ CLAUDE = shutil.which("claude")
 # instructions and tool descriptions have to carry the behaviour.
 ASSISTANT_FRAME = ("You are chatting by text with someone on a phone. Reply in plain short messages. "
                    "The Sewa Setu tools act on the government pension portal for the signed-in person.")
+ASSISTANT_FRAME_GEMMA = "\n\n" + ASSISTANT_FRAME + " Today is %s." % datetime.now().strftime("%d %B %Y")
 
 
 def claude(prompt, args, cwd, timeout=300):
@@ -197,23 +202,30 @@ def play(persona, defaults, cur):
     if persona["role"] == "citizen":
         url, tok = CITIZEN_URL, sign_in(CITIZEN_URL, "citizen", mobile=persona["mobile"])
     else:
-        url, tok = OFFICER_URL, sign_in(OFFICER_URL, "officer")
+        url, tok = OFFICER_URL, sign_in(OFFICER_URL, "officer", password=os.environ.get("OFFICER_PASSWORD"))
     workdir = tempfile.mkdtemp(prefix="sewasetu-eval-")
-    with open(os.path.join(workdir, "mcp.json"), "w") as fh:
-        json.dump({"mcpServers": {"sewasetu": {"type": "http", "url": url,
-                                               "headers": {"Authorization": "Bearer " + tok["access_token"]}}}}, fh)
+    agent = None
+    if ASSISTANT == "gemma":
+        agent = GemmaAgent(url, tok["access_token"], frame=ASSISTANT_FRAME_GEMMA)
+    else:
+        with open(os.path.join(workdir, "mcp.json"), "w") as fh:
+            json.dump({"mcpServers": {"sewasetu": {"type": "http", "url": url,
+                                                   "headers": {"Authorization": "Bearer " + tok["access_token"]}}}}, fh)
     session = str(uuid.uuid4())
     transcript, started = [], time.time()
     msg = persona["opening"]
     for i in range(int(persona.get("max_exchanges", defaults["max_exchanges"]))):
         transcript.append({"role": "user", "text": msg})
-        print("   %s: %s" % (persona["name"].split()[0], msg[:140]))
-        reply, tools = assistant_turn(msg, session, i == 0, workdir)
+        print("   %s: %s" % (persona["name"].split()[0], msg[:140]), flush=True)
+        if agent:
+            reply, tools = agent.say(msg)
+        else:
+            reply, tools = assistant_turn(msg, session, i == 0, workdir)
         transcript.append({"role": "assistant", "text": reply, "tools": tools})
-        print("   assistant [%s]: %s" % (", ".join(tools), reply[:200].replace("\n", " ")))
+        print("   assistant [%s]: %s" % (", ".join(tools), reply[:200].replace("\n", " ")), flush=True)
         for u, code in do_uploads(reply, fixture):
             print("   (uploaded the photo to %s -> %s)" % (u, code))
-        msg = persona_turn(persona, transcript, workdir)
+        msg = gemma_persona(persona["brief"], transcript) if ASSISTANT == "gemma" else persona_turn(persona, transcript, workdir)
         if "[DONE]" in msg:
             rest = msg.replace("[DONE]", "").strip()
             if rest:
@@ -235,7 +247,7 @@ def play(persona, defaults, cur):
 
 
 def main():
-    if not CLAUDE:
+    if ASSISTANT == "claude" and not CLAUDE:
         sys.exit("claude (Claude Code) is not on PATH")
     with open(os.path.join(HERE, "personas.yaml"), encoding="utf-8") as fh:
         spec = yaml.safe_load(fh)
@@ -259,7 +271,8 @@ def main():
         with open(os.path.join(RESULTS, p["id"] + ".json"), "w", encoding="utf-8") as fh:
             json.dump(r, fh, ensure_ascii=False, indent=1, default=str)
         results.append(r)
-    summary = {"ran_at": datetime.now().strftime("%Y-%m-%d %H:%M"), "model": ASSISTANT_MODEL,
+    summary = {"ran_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+               "model": ("%s (Gemma 4 as an MCP client)" % ASSISTANT_MODEL) if ASSISTANT == "gemma" else "Claude Code, " + ASSISTANT_MODEL,
                "persona_model": PERSONA_MODEL, "mcp_url": CITIZEN_URL + " , " + OFFICER_URL,
                "passed": sum(r["passed"] for r in results), "total": len(results)}
     if not only:
