@@ -17,3 +17,6 @@ services:
         sync: false
       - key: SECRET_KEY
         generateValue: true
+      # free key from https://aistudio.google.com/apikey, for the website's Gemma chat
+      - key: GEMINI_API_KEY
+        sync: false

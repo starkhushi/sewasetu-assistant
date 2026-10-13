@@ -27,6 +27,11 @@ services:
       MCP_CITIZEN_URL: ${MCP_CITIZEN_URL:-http://localhost:8101/mcp/citizen}
       MCP_OFFICER_URL: ${MCP_OFFICER_URL:-http://localhost:8102/mcp/officer}
       EVAL_RESULTS_DIR: /app/eval_results
+      # the website's own chat assistant (assistant.py): Gemma via the Gemini API, acting
+      # through the citizen MCP server like any other client
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      MCP_CITIZEN_INTERNAL_URL: http://mcp-citizen:8101/mcp/citizen
+      PORTAL_SELF_URL: http://127.0.0.1:8000
     depends_on:
       - db
       - smsgw

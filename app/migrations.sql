@@ -58,6 +58,21 @@ CREATE TABLE IF NOT EXISTS documents (
     created_at TIMESTAMP
 );
 
+-- The website's own chat assistant (assistant.py). One row per signed-in conversation:
+-- the model's history, what the person sees, and the sign-in it acts under.
+CREATE TABLE IF NOT EXISTS assistant_chats (
+    id            VARCHAR(48) PRIMARY KEY,
+    mobile        VARCHAR(15),
+    contents      JSONB NOT NULL DEFAULT '[]'::jsonb,
+    display       JSONB NOT NULL DEFAULT '[]'::jsonb,
+    access_token  TEXT,
+    refresh_token TEXT,
+    token_exp     TIMESTAMP,
+    steps         INTEGER DEFAULT 0,
+    created_at    TIMESTAMP,
+    updated_at    TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_grievance_app ON grievances(application_id);
 CREATE INDEX IF NOT EXISTS idx_grievance_status ON grievances(status);
 CREATE INDEX IF NOT EXISTS idx_app_bank ON applications(bank_account);

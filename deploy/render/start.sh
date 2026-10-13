@@ -10,6 +10,8 @@ export MCP_OFFICER_URL="${MCP_OFFICER_URL:-$PUBLIC_BASE_URL/mcp/officer}"
 export SMS_GATEWAY_URL=http://127.0.0.1:8025
 export PORTAL_INTERNAL_URL=http://127.0.0.1:8000
 export EVAL_RESULTS_DIR=/app/eval_results
+export MCP_CITIZEN_INTERNAL_URL=http://127.0.0.1:8101/mcp/citizen
+export PORTAL_SELF_URL=http://127.0.0.1:8000
 
 echo "Sewa Setu at $PUBLIC_BASE_URL"
 

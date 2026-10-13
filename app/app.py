@@ -943,6 +943,8 @@ from oauth import oauth as _oauth_blueprint   # noqa: E402  (needs the definitio
 app.register_blueprint(_oauth_blueprint)
 from api import api as _api_blueprint         # noqa: E402
 app.register_blueprint(_api_blueprint)
+from assistant import assistant as _assistant_blueprint   # noqa: E402
+app.register_blueprint(_assistant_blueprint)
 
 apply_migrations()
 
