@@ -1,0 +1,8 @@
+# Only used by deploy/render/Dockerfile (built from the repo root). The seed is
+# loaded into the database once, not shipped in the image.
+.git
+.venv
+.env
+seed
+**/__pycache__
+evals/fixtures

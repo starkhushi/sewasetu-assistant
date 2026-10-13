@@ -610,7 +610,9 @@ def _flags(cur, a):
     if not a["doc_path"]:
         flags.append("no age-proof file in the portal (counter applications keep the paper copy)")
     elif not os.path.exists(a["doc_path"]):
-        flags.append("age-proof file is recorded but missing from storage")
+        cur.execute("SELECT 1 FROM documents WHERE path = %s", (a["doc_path"],))
+        if not cur.fetchone():
+            flags.append("age-proof file is recorded but missing from storage")
     cur.execute("SELECT application_no, status FROM applications WHERE mobile = %s AND id <> %s "
                 "AND status IN %s", (a["mobile"], a["id"], portal.ACTIVE_STATUSES))
     for no, st in cur.fetchall():
@@ -735,15 +737,14 @@ def officer_case_document(app_no):
     conn = portal.get_db()
     cur = conn.cursor()
     a = _case(cur, app_no)
+    data = portal.read_document(cur, a["doc_path"]) if a else None
     cur.close(); conn.close()
     if not a:
         return _error(404, "not_found", "no application %s" % app_no)
-    if not a["doc_path"] or not os.path.exists(a["doc_path"]):
+    if data is None:
         return _error(404, "no_document", "no age-proof file is stored for %s" % a["application_no"])
     ext = a["doc_path"].rsplit(".", 1)[-1].lower()
     mime = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "pdf": "application/pdf"}.get(ext, "application/octet-stream")
-    with open(a["doc_path"], "rb") as fh:
-        data = fh.read()
     return jsonify({"filename": os.path.basename(a["doc_path"]), "mime": mime, "bytes": len(data),
                     "content_base64": base64.b64encode(data).decode("ascii")})
 

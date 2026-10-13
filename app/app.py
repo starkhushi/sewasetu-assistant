@@ -46,7 +46,9 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 # WITHDRAWN and REJECTED applications do not block a fresh application.
 ACTIVE_STATUSES = ("PENDING", "APPROVED", "DEEMED_APPROVED")
 
-SMS_GATEWAY_URL = config.get("app", "sms_gateway_url")
+SMS_GATEWAY_URL = os.environ.get("SMS_GATEWAY_URL") or config.get("app", "sms_gateway_url")
+# A hosted Postgres (e.g. Neon) is given as one URL; otherwise the [database] section.
+DATABASE_URL = os.environ.get("DATABASE_URL")
 OTP_VALIDITY_SECONDS = config.getint("app", "otp_validity_seconds")
 UPLOAD_DIR = config.get("app", "upload_dir")
 SCHEME_DEADLINE = datetime.strptime(config.get("pension", "scheme_deadline"),
@@ -69,6 +71,8 @@ except Exception:
 
 
 def get_db():
+    if DATABASE_URL:
+        return psycopg2.connect(DATABASE_URL)
     return psycopg2.connect(
         host=config.get("database", "host"),
         port=config.get("database", "port"),
@@ -854,12 +858,39 @@ def check_upload(f):
 
 
 def store_upload(mobile, filename, content):
+    """Write the file to the upload folder and keep a copy in the database, so the
+    officer can still see it on hosts whose disk is wiped on every restart."""
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     safe = re.sub(r"[^A-Za-z0-9._-]", "_", os.path.basename(filename.lower()))[-80:]
     path = os.path.join(UPLOAD_DIR, "%s_%s" % (mobile, safe))
     with open(path, "wb") as out:
         out.write(content)
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO documents (path, content, created_at) VALUES (%s, %s, %s) "
+                "ON CONFLICT (path) DO UPDATE SET content = EXCLUDED.content, created_at = EXCLUDED.created_at",
+                (path, psycopg2.Binary(content), datetime.now()))
+    conn.commit()
+    cur.close(); conn.close()
     return path
+
+
+def read_document(cur, path):
+    """The stored bytes of an uploaded document, from disk or else the database."""
+    if not path:
+        return None
+    if os.path.exists(path):
+        with open(path, "rb") as fh:
+            return fh.read()
+    cur.execute("SELECT content FROM documents WHERE path = %s", (path,))
+    row = cur.fetchone()
+    return bytes(row[0]) if row else None
+
+
+@app.route("/healthz")
+def healthz():
+    """For uptime pingers: answers without touching the database."""
+    return "ok"
 
 
 EVAL_RESULTS_DIR = os.environ.get("EVAL_RESULTS_DIR", os.path.join(BASE_DIR, "eval_results"))

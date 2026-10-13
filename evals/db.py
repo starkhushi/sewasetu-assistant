@@ -3,8 +3,6 @@
 checking the portal's record after it. Mobiles 98000000xx are reserved for evals."""
 
 import os
-import shutil
-import subprocess
 
 import psycopg2
 
@@ -14,7 +12,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def connect():
-    conn = psycopg2.connect(**DSN)
+    # EVAL_DB_URL for a hosted database (the Neon URL when testing the Render deploy)
+    url = os.environ.get("EVAL_DB_URL")
+    conn = psycopg2.connect(url) if url else psycopg2.connect(**DSN)
     conn.autocommit = True
     return conn
 
@@ -23,18 +23,20 @@ def clear_mobile(cur, mobile):
     assert mobile.startswith("98000000"), "evals only touch the reserved 98000000xx mobiles"
     cur.execute("DELETE FROM audit_log WHERE application_id IN (SELECT id FROM applications WHERE mobile = %s)", (mobile,))
     cur.execute("DELETE FROM grievances WHERE mobile = %s", (mobile,))
+    cur.execute("DELETE FROM documents WHERE path LIKE %s", ("%%/%s\\_%%" % mobile,))
     cur.execute("DELETE FROM applications WHERE mobile = %s", (mobile,))
     for t in ("drafts", "upload_tokens", "portal_users", "otps"):
         cur.execute("DELETE FROM %s WHERE mobile = %%s" % t, (mobile,))
 
 
-def _copy_document(mobile, fixture):
-    """Put a document where the app container keeps uploads, so the officer can view it."""
-    name = "%s_%s" % (mobile, os.path.basename(fixture))
-    docker = shutil.which("docker")
-    subprocess.run([docker, "compose", "cp", os.path.join(HERE, fixture), "app:/var/sewasetu/uploads/" + name],
-                   check=True, capture_output=True, cwd=os.path.dirname(HERE))
-    return "/var/sewasetu/uploads/" + name
+def _store_document(cur, mobile, fixture):
+    """Store a document the way the portal keeps its copies, so the officer can view it."""
+    path = "/var/sewasetu/uploads/%s_%s" % (mobile, os.path.basename(fixture))
+    with open(os.path.join(HERE, fixture), "rb") as fh:
+        content = fh.read()
+    cur.execute("INSERT INTO documents (path, content, created_at) VALUES (%s, %s, now()) "
+                "ON CONFLICT (path) DO UPDATE SET content = EXCLUDED.content", (path, psycopg2.Binary(content)))
+    return path
 
 
 def seed_application(cur, mobile, spec, fixture):
@@ -49,7 +51,7 @@ def seed_application(cur, mobile, spec, fixture):
     sub = int(spec.get("submitted_days_ago", 1))
     dec = spec.get("decided_days_ago")
     decided_by = spec.get("decided_by", "admin" if status in ("APPROVED", "REJECTED") else None)
-    doc = _copy_document(mobile, fixture) if spec.get("with_document") else ""
+    doc = _store_document(cur, mobile, fixture) if spec.get("with_document") else ""
     cur.execute(
         """INSERT INTO applications (application_no, applicant_name, mobile, dob, gender, marital_status,
            husband_name, husband_employer, village, block, bank_account, ifsc, doc_path, status, submitted_at,

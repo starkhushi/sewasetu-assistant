@@ -50,6 +50,14 @@ CREATE TABLE IF NOT EXISTS grievances (
     resolved_by    VARCHAR(50),
     resolution     VARCHAR(1000)
 );
+-- Copies of uploaded documents, keyed by the doc_path stored on the application. The
+-- upload folder stays the primary copy; this one survives hosts with throwaway disks.
+CREATE TABLE IF NOT EXISTS documents (
+    path       VARCHAR(200) PRIMARY KEY,
+    content    BYTEA,
+    created_at TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_grievance_app ON grievances(application_id);
 CREATE INDEX IF NOT EXISTS idx_grievance_status ON grievances(status);
 CREATE INDEX IF NOT EXISTS idx_app_bank ON applications(bank_account);

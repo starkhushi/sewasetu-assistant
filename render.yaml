@@ -1,0 +1,19 @@
+# Render blueprint: one free web service running the whole portal (see deploy/render/).
+# The database is Neon's free Postgres; paste its connection string as DATABASE_URL.
+services:
+  - type: web
+    name: sewasetu
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./deploy/render/Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true

@@ -1,0 +1,26 @@
+# Inside the single container: the host (Render) terminates HTTPS and forwards to $PORT.
+{
+	auto_https off
+	admin off
+}
+
+:{$PORT} {
+	# for the uptime pinger; answered here so nothing wakes the database
+	handle /healthz {
+		respond "ok" 200
+	}
+
+	@citizen path /mcp/citizen /mcp/citizen/* /.well-known/oauth-protected-resource/mcp/citizen*
+	handle @citizen {
+		reverse_proxy 127.0.0.1:8101
+	}
+
+	@officer path /mcp/officer /mcp/officer/* /.well-known/oauth-protected-resource/mcp/officer*
+	handle @officer {
+		reverse_proxy 127.0.0.1:8102
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:8000
+	}
+}

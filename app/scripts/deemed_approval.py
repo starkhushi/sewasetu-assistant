@@ -25,17 +25,20 @@ with open(CONFIG_PATH) as fh:
     config.read_file(fh)
 
 SLA_DAYS = config.getint("pension", "sla_days")
-SMS_GATEWAY_URL = config.get("app", "sms_gateway_url")
+SMS_GATEWAY_URL = os.environ.get("SMS_GATEWAY_URL") or config.get("app", "sms_gateway_url")
 
 
 def main():
-    conn = psycopg2.connect(
-        host=config.get("database", "host"),
-        port=config.get("database", "port"),
-        dbname=config.get("database", "name"),
-        user=config.get("database", "user"),
-        password=config.get("database", "password"),
-    )
+    if os.environ.get("DATABASE_URL"):
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    else:
+        conn = psycopg2.connect(
+            host=config.get("database", "host"),
+            port=config.get("database", "port"),
+            dbname=config.get("database", "name"),
+            user=config.get("database", "user"),
+            password=config.get("database", "password"),
+        )
     cur = conn.cursor()
     cutoff = datetime.now() - timedelta(days=SLA_DAYS)
     # Same derived dates as an officer's approval (see decide_application in app.py):
