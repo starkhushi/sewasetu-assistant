@@ -23,8 +23,16 @@ if ! swapon --show | grep -q swapfile; then
     echo '/swapfile none swap sw 0 0' >> /etc/fstab
 fi
 
-# Only SSH and the web are open; Postgres and the internal ports stay on localhost
-if command -v ufw >/dev/null 2>&1; then
+# Only SSH and the web are open; Postgres and the internal ports stay on localhost.
+# Oracle Cloud's Ubuntu images carry their own iptables rules that reject everything
+# but SSH (saved in /etc/iptables/rules.v4); open 80/443 there instead of using ufw.
+if [ -f /etc/iptables/rules.v4 ]; then
+    for p in 443 80; do
+        iptables -C INPUT -p tcp --dport $p -j ACCEPT 2>/dev/null || \
+            iptables -I INPUT 5 -p tcp -m state --state NEW --dport $p -j ACCEPT
+    done
+    netfilter-persistent save
+elif command -v ufw >/dev/null 2>&1; then
     ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw --force enable
 fi
 
