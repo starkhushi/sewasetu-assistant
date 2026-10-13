@@ -20,3 +20,6 @@ services:
       # free key from https://aistudio.google.com/apikey, for the website's Gemma chat
       - key: GEMINI_API_KEY
         sync: false
+      # Google Search Console HTML-tag value, to request a Safe Browsing review
+      - key: GOOGLE_SITE_VERIFICATION
+        sync: false

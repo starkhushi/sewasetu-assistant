@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Sign in to Sewa Setu</h2>
+<h2>Sign in to Sewa Setu <span class="badge" style="vertical-align:middle">demo</span></h2>
 <p class="note"><b>{{ client_name }}</b> wants to {{ 'act for you on the pension portal' if role == 'citizen' else 'act as a block officer' }}.
 Sign in to continue. {% if role == 'citizen' %}<b>Enter the OTP only on this page.</b>{% endif %}</p>
 {% if role == 'citizen' %}

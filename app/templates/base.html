@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Sewa Setu - Old Age Pension Portal{% endblock %}</title>
+<meta name="description" content="Demonstration project: a fictional state pension portal built for a fellowship assignment. Not a real government website.">
+{% if config.get('GOOGLE_SITE_VERIFICATION') %}<meta name="google-site-verification" content="{{ config['GOOGLE_SITE_VERIFICATION'] }}">{% endif %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -34,6 +36,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .nav a{color:#fff;text-decoration:none;font-size:15px;padding:8px 12px;border-radius:8px}
 .nav a:hover{background:rgba(255,255,255,.12)}
 .band{height:5px;background:linear-gradient(90deg,var(--saffron) 0 33%,#fff 33% 66%,var(--green) 66%)}
+
+.demo-note{background:#fff8e1;border-bottom:1px solid #f1d29b;color:#5c4300;font-size:14px;text-align:center;padding:8px 16px}
+.demo-note a{color:#5c4300}
 
 /* page */
 .container{max-width:960px;margin:20px auto;background:var(--card);padding:28px;
@@ -139,6 +144,11 @@ pre.code{background:#0f1b2a;color:#e6edf5;padding:14px;border-radius:8px;overflo
   </div>
 </header>
 <div class="band" aria-hidden="true"></div>
+<div class="demo-note" role="note">
+  <b>Demonstration project.</b> Purvanchal and this scheme are fictional; this is not a real government
+  website. Do not enter real personal or bank details. OTPs appear in the <a href="/__gateway/">demo SMS inbox</a>,
+  not on any phone.
+</div>
 <main class="container">
 {% with messages = get_flashed_messages() %}
   {% for m in messages %}<div class="flash" role="alert">{{ m }}</div>{% endfor %}
