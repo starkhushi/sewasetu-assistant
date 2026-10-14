@@ -146,7 +146,8 @@ def console():
     view = []
     for m in _messages(to, last=100):
         # make the OTP stand out; escape everything else
-        html = re.sub(r"\b(\d{6})\b", r'<span class="otp">\1</span>', escape(m["text"]))
+        # str() first: on a Markup object re.sub would escape the <span> we add as well
+        html = re.sub(r"\b(\d{6})\b", r'<span class="otp">\1</span>', str(escape(m["text"])))
         view.append({
             "id": m["id"], "to": m["to"], "text": m["text"], "html": html,
             "sent_hhmm": datetime.fromtimestamp(m["sent_at"], IST).strftime("%d %b %H:%M:%S"),

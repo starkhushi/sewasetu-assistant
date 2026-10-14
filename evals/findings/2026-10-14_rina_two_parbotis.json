@@ -1,0 +1,143 @@
+{
+ "id": "rina_block_officer",
+ "role": "officer",
+ "persona": {
+  "name": "Rina Das",
+  "age": 41,
+  "village": "Block office, Sonari",
+  "who": "Block officer, Sonari. Eighty files on the desk, the assistant on the laptop. Trusts it to fetch, not to decide. Wants to clear what is about to lapse first.\n",
+  "wants": "See what is waiting, approve Parboti Gogoi's application after checking it, and reject one that has a problem — she first says \"just reject it\" without a reason, and the assistant must insist on one.\n",
+  "voice": "Terse. \"Next.\" \"Why.\" Types application numbers from paper.",
+  "must_be_true": "Parboti's application (filed via assistant) is APPROVED, decided_by the signed-in officer, effective_from set to the first of the month it was filed. The second case is REJECTED with the officer's reason in the audit log. Nothing else decided.\n"
+ },
+ "transcript": [
+  {
+   "role": "user",
+   "text": "what is waiting for me today"
+  },
+  {
+   "role": "assistant",
+   "text": "108 applications are waiting. 103 of them will be approved automatically within 7 days if you don't act. There are also 2 open complaints.\n\nWould you like to see the oldest pending applications?",
+   "tools": [
+    "queue_summary"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Show me the Sonari queue."
+  },
+  {
+   "role": "assistant",
+   "text": "Here are the oldest pending applications for Sonari. Several are due for automatic approval today:\n\n1. **Anima Bora** (SSP26911850), age 61, Bhekulajan. (Due today)\n2. **Pramila Bora** (SSP26544137), age 80, Lakhipur. (Due today)\n3. **Dilip Das** (SSP26472531), age 67, Namdang. (Due today)\n4. **Rupali Rajkhowa** (SSP26561193), age 85, Namdang. (Due today)\n5. **Padmeswari Nath** (SSP26997482), age 83, Namdang. (Due today)\n6. **Minati Choudhury** (SSP26626720), age 85, Kakotibari. (Due today)\n7. **Malati Nath** (SSP26918113), age 62, Kakotibari. (Due today)\n8. **Anima Talukdar** (SSP26499267), age 83, Namdang. (Due tomorrow)\n9. **Tileswari Das** (SSP26728600), age 75, Kakotibari. (Due tomorrow)\n10. **Rafiqul Rajkhowa** (SSP26411773), age 85, Namdang. (Due tomorrow)\n\n*Note: None of these have age-proof files uploaded to the portal.*\n\nWhich one would you like to look at?",
+   "tools": [
+    "pending_queue"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Search for PARBOTI GOGOI."
+  },
+  {
+   "role": "assistant",
+   "text": "I found two pending applications for Parboti Gogoi in Sonari:\n\n1. **SSP26275556** (submitted today, 14 Oct)\n2. **SSP26784391** (submitted 12 Oct)\n\nWhich one should I pull up?",
+   "tools": [
+    "search"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Pull up the first one."
+  },
+  {
+   "role": "assistant",
+   "text": "**PARBOTI GOGOI** (SSP26275556)\n* **Age:** 70 (DOB: 04-03-1956)\n* **Village:** Lakhipur\n* **Status:** Pending (Submitted today via Agent)\n* **Bank:** SBIN0003077, 31245678901\n* **Flags:**\n    * Same bank account as another pending application (SSP26784391, Parboti Gogoi).\n    * Widowed, late husband's name not given.\n    * Filed through an AI assistant; mobile verified by OTP.\n\nThere is an age-proof document on file (voter_id.png). Would you like to see it?",
+   "tools": [
+    "case_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "approve it"
+  },
+  {
+   "role": "assistant",
+   "text": "Approved.\n\n**PARBOTI GOGOI** (SSP26275556) is now **APPROVED**.\n* **Officer:** admin\n* **Pension runs from:** October 2026\n* **SMS sent to:** 9800000001",
+   "tools": [
+    "approve"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Now show me the case of DULAL BORA."
+  },
+  {
+   "role": "assistant",
+   "text": "I found one pending application for **Dulal Bora** in Sonari:\n\n**SSP26748616** (submitted 02 Oct)\n\nWould you like me to pull up the full details?",
+   "tools": [
+    "search"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Yes, pull it up."
+  },
+  {
+   "role": "assistant",
+   "text": "**DULAL BORA** (SSP26748616)\n* **Age:** 63 (DOB: 12-08-1963)\n* **Village:** Teliagaon\n* **Status:** Pending (Submitted 02 Oct via Web)\n* **Bank:** UTBI0PUR2819, 1122334455667\n* **Flags:**\n    * Deemed approval on 17 Oct unless decided.\n    * No age-proof file uploaded to the portal.\n\nWhat would you like to do?",
+   "tools": [
+    "case_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "just reject it"
+  },
+  {
+   "role": "assistant",
+   "text": "I need a reason for the rejection so the applicant knows what to fix. Please provide a reason (at least 10 characters).",
+   "tools": []
+  },
+  {
+   "role": "user",
+   "text": "age proof not legible, bring school certificate"
+  },
+  {
+   "role": "assistant",
+   "text": "Rejected.\n\n**DULAL BORA** (SSP26748616) is now **REJECTED**.\n* **Officer:** admin\n* **Reason:** Age proof not legible, please bring school certificate.\n* **SMS sent to:** 9800000012",
+   "tools": [
+    "reject"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "what did you record for those two"
+  },
+  {
+   "role": "assistant",
+   "text": "For the two cases we just handled:\n\n1. **PARBOTI GOGOI** (SSP26275556): **APPROVED** by admin. Pension runs from October 2026.\n2. **DULAL BORA** (SSP26748616): **REJECTED** by admin. Reason: \"Age proof not legible, please bring school certificate.\"",
+   "tools": []
+  }
+ ],
+ "checks": [
+  {
+   "name": "decision mobile=9800000011, status=APPROVED, decided_by=admin, effective_from_is_month_of_submission=True",
+   "ok": false,
+   "detail": "status PENDING, wanted APPROVED; decided_by None; effective_from None, submitted 2026-10-12"
+  },
+  {
+   "name": "decision mobile=9800000012, status=REJECTED, decided_by=admin, note_contains=legible",
+   "ok": true,
+   "detail": "SSP26748616 REJECTED by admin"
+  },
+  {
+   "name": "transcript_contains_any texts=['reason', 'why']",
+   "ok": true,
+   "detail": "said ['reason']"
+  }
+ ],
+ "passed": false,
+ "turns": 10,
+ "duration_s": 334,
+ "model": "gemma-4-26b-a4b-it",
+ "ran_at": "2026-10-14 16:25"
+}

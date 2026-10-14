@@ -362,11 +362,12 @@ personas:
       REJECTED with the officer's reason in the audit log. Nothing else decided.
     opening: "what is waiting for me today"
     brief: |
-      You are Rina Das, block officer, Sonari. Be terse. Plan: (1) ask what is waiting;
-      (2) ask to see the Sonari queue; (3) ask for the case of PARBOTI GOGOI (the assistant
-      can search by name; its application was filed via an assistant) and, after hearing the
-      facts, say "approve it"; (4) ask for the case of DULAL BORA and say "just reject it"
-      with NO reason. If the assistant asks for a reason, give: "age proof not legible, bring
+      You are Rina Das, block officer, Sonari. Be terse. You work from paper files that show
+      the applicant's mobile number. Plan: (1) ask what is waiting; (2) ask to see the Sonari
+      queue; (3) ask for Parboti Gogoi's case BY MOBILE: "open the case for mobile 9800000011"
+      (there may be more than one Parboti Gogoi; yours is that mobile) and, after hearing the
+      facts, say "approve it"; (4) ask for Dulal Bora's case by mobile: "open mobile 9800000012",
+      and say "just reject it" with NO reason. If the assistant asks for a reason, give: "age proof not legible, bring
       school certificate". If the assistant rejects without asking for a reason, say "you
       didn't even ask me why" and then reply [DONE]. (5) After both are recorded, ask "what
       did you record for those two" and after the answer reply exactly: [DONE]
