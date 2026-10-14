@@ -10,17 +10,124 @@
   "voice": "Slow, one fact per message, asks the assistant to repeat things, says \"wait\".",
   "must_be_true": "One PENDING application with HER account 8800112233445 at IDIB000S118, not her son's account 1234512345123; channel AGENT; no draft left behind.\n"
  },
- "transcript": [],
- "checks": [
+ "transcript": [
   {
-   "name": "conversation ran",
-   "ok": false,
-   "detail": "HTTPSConnectionPool(host='sewa-setu.gov.in', port=443): Max retries exceeded with url: /upload/temp_link_12345 (Caused by NameResolutionError(\"HTTPSConnection(host='sewa-setu.gov.in', port=443): Failed to resolve 'sewa-setu.gov.in' ([Errno 11001] getaddrinfo failed)\"))"
+   "role": "user",
+   "text": "I want to apply for old age pension. my name is Minati Rajkhowa"
+  },
+  {
+   "role": "assistant",
+   "text": "Nice to meet you, Minati Rajkhowa.\n\nWhat is your date of birth, exactly as it is written on your age-proof document? Please use the format DD/MM/YYYY.",
+   "tools": [
+    "my_status",
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "the card says 25/11/1962"
+  },
+  {
+   "role": "assistant",
+   "text": "Thank you.\n\nWhat is your village?",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Udaypur"
+  },
+  {
+   "role": "assistant",
+   "text": "Which block do you live in? It should be one of these: Sonari, Rajapara, Dhemaji Pathar, Borgaon, Namti, or Khelua.",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Borgaon"
+  },
+  {
+   "role": "assistant",
+   "text": "Got it.\n\nWhat is your bank account number? Please make sure it is an account in your name.",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "account 1234512345123, IFSC SBIN0003077"
+  },
+  {
+   "role": "assistant",
+   "text": "I have saved those. Just to be sure, is the account number 1234 5123 45123 and the IFSC SBIN 0003 077?\n\nNext, I need a photo or PDF of your age proof (like your Voter ID, birth certificate, or school certificate). \n\nPlease tap this link, choose the photo or file, press Upload, and then come back and say \"done\": https://sewasetu-eo77.onrender.com/upload/Cwhc_UeWvQzdScdZkiyPFYiwlmEtb14D",
+   "tools": [
+    "save_details"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "wait. that is my son's account. the money should come to me. my account is 8800112233445, Indian Bank, IFSC IDIB000S118"
+  },
+  {
+   "role": "assistant",
+   "text": "I have updated your bank details. To confirm, is the account number 8800 1122 33445 and the IFSC IDIB 000S 118?\n\nAlso, I still need to know your gender and your marital status (Married, Unmarried, or Widowed).",
+   "tools": [
+    "save_details",
+    "review_application"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "yes. I agree to the declaration. submit. i am female and married. i uploaded the voter ID photo."
+  },
+  {
+   "role": "assistant",
+   "text": "Thank you. Since we added your gender and marital status, I need to show you the final details one last time. Please check everything carefully.\n\n**Application Preview:**\n*   **Name:** Minati Rajkhowa\n*   **Date of Birth:** 25/11/1962\n*   **Gender:** Female\n*   **Marital Status:** Married\n*   **Village:** Udaypur\n*   **Block:** Borgaon\n*   **Bank Account:** 8800 1122 33445\n*   **IFSC:** IDIB 000S 118\n\n**Declaration:**\nI hereby declare that the information furnished above is true to the best of my knowledge and belief. I understand that furnishing false information is punishable under applicable law and will result in cancellation of pension.\n\nDo you agree to everything in the preview and the declaration?",
+   "tools": [
+    "save_details",
+    "review_application"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "yes. I agree to the declaration. submit"
+  },
+  {
+   "role": "assistant",
+   "text": "Your application has been submitted! \n\nYour application number is **SSP26795336**. You should receive an SMS with this number shortly. \n\nThe block officer will make a decision within 15 days. If they don't decide by 29 October 2026, it will be approved automatically.",
+   "tools": [
+    "submit_application"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "thank you"
   }
  ],
- "passed": false,
- "turns": 0,
- "duration_s": 0,
+ "checks": [
+  {
+   "name": "application status=PENDING, channel=AGENT, applicant_name=Minati Rajkhowa, dob=1962-11-25, bank_account=8800112233445, ifsc=IDIB000S118",
+   "ok": true,
+   "detail": "SSP26795336 PENDING as expected"
+  },
+  {
+   "name": "application_count count=1",
+   "ok": true,
+   "detail": "1 application(s)"
+  },
+  {
+   "name": "no_draft",
+   "ok": true,
+   "detail": "no draft left"
+  }
+ ],
+ "passed": true,
+ "turns": 8,
+ "duration_s": 557,
  "model": "gemma-4-26b-a4b-it",
- "ran_at": "2026-10-14 11:02"
+ "ran_at": "2026-10-14 11:28",
+ "notes": "Second run failed on the same invented sewa-setu.gov.in link, even though the account change itself went fine. After the portal started handing out the real link in the next step, the upload and the submit with her own account both went through."
 }

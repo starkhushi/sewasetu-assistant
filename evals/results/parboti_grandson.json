@@ -159,5 +159,6 @@
  "turns": 11,
  "duration_s": 472,
  "model": "gemma-4-26b-a4b-it",
- "ran_at": "2026-10-14 10:46"
+ "ran_at": "2026-10-14 10:46",
+ "notes": "First run failed: Gemma kept saying \"I will send a link\" (once a literal [link]) without ever making one, so the grandson 'uploaded' to nothing until the run ran out. I made each saved answer return one concrete next step; this run it gave a real link and submitted."
 }

@@ -81,5 +81,6 @@
  "turns": 4,
  "duration_s": 165,
  "model": "gemma-4-26b-a4b-it",
- "ran_at": "2026-10-14 10:56"
+ "ran_at": "2026-10-14 10:56",
+ "notes": "The operator caught his own IFSC typo at the preview; the corrected IFSC is what went in."
 }

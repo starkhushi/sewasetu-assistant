@@ -74,5 +74,6 @@
  "turns": 3,
  "duration_s": 121,
  "model": "gemma-4-26b-a4b-it",
- "ran_at": "2026-10-14 10:48"
+ "ran_at": "2026-10-14 10:48",
+ "notes": "It read out the account ending and IFSC the money goes to, and recorded a payment complaint that now sits in the officer's queue. No new application was started."
 }

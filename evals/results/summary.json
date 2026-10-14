@@ -1,0 +1,8 @@
+{
+ "ran_at": "2026-10-14 11:28",
+ "model": "gemma-4-26b-a4b-it (Gemma 4 as an MCP client)",
+ "persona_model": "gemma-4-31b-it",
+ "mcp_url": "https://sewasetu-eo77.onrender.com/mcp/citizen , https://sewasetu-eo77.onrender.com/mcp/officer",
+ "passed": 7,
+ "total": 7
+}

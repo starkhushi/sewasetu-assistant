@@ -1,0 +1,26 @@
+{
+ "id": "minati_changes_mind",
+ "role": "citizen",
+ "persona": {
+  "name": "Minati Rajkhowa",
+  "age": 63,
+  "village": "Udaypur, Borgaon block",
+  "who": "Applying herself, slowly, on her own phone. Gives her son's bank account first because \"he handles money\", then at the preview remembers the pension must come to her own account and changes it.\n",
+  "wants": "Apply, and have the money come to her own account.",
+  "voice": "Slow, one fact per message, asks the assistant to repeat things, says \"wait\".",
+  "must_be_true": "One PENDING application with HER account 8800112233445 at IDIB000S118, not her son's account 1234512345123; channel AGENT; no draft left behind.\n"
+ },
+ "transcript": [],
+ "checks": [
+  {
+   "name": "conversation ran",
+   "ok": false,
+   "detail": "HTTPSConnectionPool(host='sewa-setu.gov.in', port=443): Max retries exceeded with url: /upload/temp_link_12345 (Caused by NameResolutionError(\"HTTPSConnection(host='sewa-setu.gov.in', port=443): Failed to resolve 'sewa-setu.gov.in' ([Errno 11001] getaddrinfo failed)\"))"
+  }
+ ],
+ "passed": false,
+ "turns": 0,
+ "duration_s": 0,
+ "model": "gemma-4-26b-a4b-it",
+ "ran_at": "2026-10-14 11:02"
+}

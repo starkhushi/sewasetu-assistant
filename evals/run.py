@@ -282,10 +282,17 @@ def main():
                "model": ("%s (Gemma 4 as an MCP client)" % ASSISTANT_MODEL) if ASSISTANT == "gemma" else "Claude Code, " + ASSISTANT_MODEL,
                "persona_model": PERSONA_MODEL, "mcp_url": CITIZEN_URL + " , " + OFFICER_URL,
                "passed": sum(r["passed"] for r in results), "total": len(results)}
-    if not only:
-        with open(os.path.join(RESULTS, "summary.json"), "w", encoding="utf-8") as fh:
-            json.dump(summary, fh, indent=1)
-    print("\n%d / %d passed" % (summary["passed"], summary["total"]))
+    print("\n%d / %d passed in this run" % (summary["passed"], summary["total"]))
+    # the dashboard summary covers every persona's latest result, so re-running a few
+    # personas updates the whole picture
+    latest = []
+    for n in sorted(os.listdir(RESULTS)):
+        if n.endswith(".json") and n != "summary.json":
+            with open(os.path.join(RESULTS, n), encoding="utf-8") as fh:
+                latest.append(json.load(fh))
+    summary.update(passed=sum(1 for r in latest if r.get("passed")), total=len(latest))
+    with open(os.path.join(RESULTS, "summary.json"), "w", encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=1)
 
 
 if __name__ == "__main__":
