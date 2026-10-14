@@ -203,7 +203,7 @@ def notify_decision(app_no, mobile, new_status, note=""):
                          "credited to your bank account by DBT." % (app_no, PENSION_PER_MONTH))
     elif new_status == "REJECTED":
         send_sms(mobile, "Sewa Setu: application %s is REJECTED. Reason: %s. You may apply "
-                         "afresh after correcting this." % (app_no, note[:120]))
+                         "afresh after correcting this." % (app_no, note[:120].rstrip(" .")))
 
 
 # ---------------------------------------------------------------------------
