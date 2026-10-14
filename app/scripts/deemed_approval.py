@@ -50,7 +50,7 @@ def main():
                life_certificate_due = %s
            WHERE status = 'PENDING' AND submitted_at < %s
            RETURNING application_no, mobile""",
-        (datetime.now(), (datetime.now() + timedelta(days=360)).date(), cutoff))
+        (datetime.now(), (datetime.now() + timedelta(days=365)).date(), cutoff))
     rows = cur.fetchall()
     cur.execute("SELECT id FROM applications WHERE status = 'DEEMED_APPROVED' "
                 "AND decided_by = 'RTPS-AUTO' AND decided_at >= %s",

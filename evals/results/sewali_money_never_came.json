@@ -1,0 +1,78 @@
+{
+ "id": "sewali_money_never_came",
+ "role": "citizen",
+ "persona": {
+  "name": "Sewali Das",
+  "age": 74,
+  "village": "Kathoni, Dhemaji Pathar block",
+  "who": "Pension approved five months ago. Not one rupee has come. She has been to the bank twice; once they said \"KYC not done\", once they said \"ask the block office\". The block office said \"ask the bank\". Her daughter Juri is typing.\n",
+  "wants": "Find out why the money has not come and make someone responsible for it.",
+  "voice": "Juri types in full sentences, worried, repeats the story. Does not know what IFSC means.\n",
+  "must_be_true": "No new application is made. A PAYMENT_NOT_RECEIVED complaint is OPEN on the approved application. The assistant told them which account (last four digits) and IFSC the money goes to, and that the pension runs from the month of application.\n"
+ },
+ "transcript": [
+  {
+   "role": "user",
+   "text": "My mother's pension was approved in May but no money has come. Bank says KYC not done. What do we do, we have gone three times"
+  },
+  {
+   "role": "assistant",
+   "text": "I found the application (SSP26968211). It was approved on 17 May 2026.\n\nThe pension is being sent to the account ending in 4321 with IFSC CNRB0004417. Is this the correct account?",
+   "tools": [
+    "my_status"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "Yes, that is her account, ending 4321. What is this IFSC? I want to register a complaint so someone has to answer us."
+  },
+  {
+   "role": "assistant",
+   "text": "The IFSC is just a code for your bank branch.\n\nI have registered your complaint. The complaint number is 4.\n\nThe block officer must now look into this. The money is being sent to the account ending 4321 at IFSC CNRB0004417. If that is not your mother's own open account, please let me know.",
+   "tools": [
+    "report_payment_problem"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "The complaint number is 4. What happens next?"
+  },
+  {
+   "role": "assistant",
+   "text": "The complaint is now with the block officer. They will look into why the money is not reaching the account.\n\nKeep the complaint number, 4. If you don't hear anything or if the bank says something else, you can check back here.",
+   "tools": []
+  }
+ ],
+ "checks": [
+  {
+   "name": "application_count count=1",
+   "ok": true,
+   "detail": "1 application(s)"
+  },
+  {
+   "name": "grievance status=OPEN, kind=PAYMENT_NOT_RECEIVED",
+   "ok": true,
+   "detail": "PAYMENT_NOT_RECEIVED OPEN: The bank says KYC is not done and the money has not been received since May."
+  },
+  {
+   "name": "transcript_contains text=4321",
+   "ok": true,
+   "detail": "assistant said '4321'"
+  },
+  {
+   "name": "transcript_contains text=CNRB0004417",
+   "ok": true,
+   "detail": "assistant said 'CNRB0004417'"
+  },
+  {
+   "name": "no_draft",
+   "ok": true,
+   "detail": "no draft left"
+  }
+ ],
+ "passed": true,
+ "turns": 3,
+ "duration_s": 121,
+ "model": "gemma-4-26b-a4b-it",
+ "ran_at": "2026-10-14 10:48"
+}

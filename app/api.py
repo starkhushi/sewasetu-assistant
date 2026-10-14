@@ -264,15 +264,32 @@ def _draft_view(cur, mobile, data, doc_path):
               "village": "the village", "block": "the block", "bank_account": "the bank account number",
               "ifsc": "the IFSC"}
     fields_missing = [k for k in missing if k != "age_proof_document"]
+    dob = portal.parse_dob(data.get("dob"))
+    too_young = dob is not None and portal.age_on(dob, portal.now_ist().date()) < portal.MIN_AGE
     if live:
         out["next_step"] = "Explain the existing application instead; do not start a new one."
+    elif too_young:
+        # eligibility comes before anything else (an eval had Gemma collecting a 57-year-old's
+        # bank details because the next step only looked at missing fields)
+        sixty = dob.replace(year=dob.year + portal.MIN_AGE) if not (dob.month == 2 and dob.day == 29) \
+            else dob.replace(year=dob.year + portal.MIN_AGE, day=28)
+        out["eligible"] = False
+        out["next_step"] = ("Stop here. By the date of birth on the document the applicant is %d, and the scheme "
+                            "is for %d and above. Tell them plainly they cannot apply yet, that they can apply "
+                            "from %s, and do not ask for anything more. Do not change the date of birth."
+                            % (portal.age_on(dob, portal.now_ist().date()), portal.MIN_AGE,
+                               sixty.strftime("%d %B %Y")))
     elif fields_missing:
         out["next_step"] = "Ask for %s." % labels[fields_missing[0]]
     elif not doc_path:
-        out["next_step"] = ("Call the upload_link tool now and put the exact upload_url it returns in your reply. "
-                            "Never promise a link without calling it, and never write a placeholder like [link]. "
-                            "If the person says they uploaded but age_proof_document is still empty, they did "
-                            "not use a working link: call upload_link again and give the new link.")
+        # The portal makes the link itself: two eval runs had Gemma invent a plausible
+        # government URL instead of calling upload_link. A real link to copy leaves nothing to invent.
+        url = _upload_url(cur, mobile)
+        out["upload_url"] = url
+        out["next_step"] = ("Only the age-proof document is missing. Give the person this exact link, copied "
+                            "character for character: %s . Say: tap the link, choose the photo of the Voter ID, "
+                            "birth certificate or school certificate, press Upload, then come back and say done. "
+                            "Never write any other link." % url)
     elif out["ready_to_review"]:
         out["next_step"] = "Call review_application and read the whole preview and the declaration back."
     else:
@@ -396,19 +413,30 @@ def citizen_draft_document():
     return jsonify(out)
 
 
+def _upload_url(cur, mobile):
+    """A one-time upload link for this mobile, reusing an unused one made in the last 20
+    minutes so repeated draft reads do not mint a new link each time. Commits."""
+    cur.execute("SELECT token FROM upload_tokens WHERE mobile = %s AND used_at IS NULL AND created_at > %s "
+                "ORDER BY created_at DESC LIMIT 1", (mobile, datetime.now() - timedelta(minutes=20)))
+    row = cur.fetchone()
+    token = row[0] if row else secrets.token_urlsafe(24)
+    if not row:
+        cur.execute("INSERT INTO upload_tokens (token, mobile, created_at) VALUES (%s, %s, %s)",
+                    (token, mobile, datetime.now()))
+        cur.connection.commit()
+    return oauth.ISSUER + "/upload/" + token
+
+
 @api.post("/citizen/draft/upload-link")
 @require_role("citizen")
 def citizen_upload_link():
     """A one-time link to attach the document from the phone's browser."""
     mobile = g.who
-    token = secrets.token_urlsafe(24)
     conn = portal.get_db()
     cur = conn.cursor()
-    cur.execute("INSERT INTO upload_tokens (token, mobile, created_at) VALUES (%s, %s, %s)",
-                (token, mobile, datetime.now()))
-    conn.commit()
+    url = _upload_url(cur, mobile)
     cur.close(); conn.close()
-    return jsonify({"upload_url": oauth.ISSUER + "/upload/" + token, "valid_for_minutes": 30,
+    return jsonify({"upload_url": url, "valid_for_minutes": 30,
                     "message": "Open this link on the phone, choose the photo or PDF of the age proof, "
                                "and press Upload. Then check the draft again."})
 
@@ -600,7 +628,7 @@ def citizen_life_certificate(app_no):
         cur.close(); conn.close()
         return _error(409, "not_approved", "a life certificate applies only to an approved pension")
     now = datetime.now()
-    due = (now + timedelta(days=30 * portal.LIFE_CERT_MONTHS)).date()
+    due = portal.a_year_from(now)
     cur.execute("UPDATE applications SET life_certified_at = %s, life_certificate_due = %s WHERE id = %s",
                 (now, due, a["id"]))
     portal.write_audit(cur, a["id"], "LIFE_CERT", "applicant:%s" % mobile, "confirmed alive via assistant (OTP sign-in)")

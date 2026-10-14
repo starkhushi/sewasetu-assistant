@@ -1,0 +1,63 @@
+{
+ "id": "bhaben_life_certificate",
+ "role": "citizen",
+ "persona": {
+  "name": "Bhaben Saikia",
+  "age": 81,
+  "village": "Sialmari, Khelua block",
+  "who": "Pension running for over a year (deemed approved, nobody ever looked at it). The yearly life certificate was due last month; he does not know such a thing exists. His neighbour's boy is typing. He only wants to \"check that everything is fine\".\n",
+  "wants": "Reassurance. He does not know what to ask for.",
+  "voice": "Very short messages, polite, sometimes refers to himself in the third person.",
+  "must_be_true": "The life certificate is recorded (life_certified_at set, due date moved a year on). No complaint is raised, no new application. He was told the pension runs from which month.\n"
+ },
+ "transcript": [
+  {
+   "role": "user",
+   "text": "Bhaben Saikia here, Sialmari. pension is coming. just want to check all is fine with my file"
+  },
+  {
+   "role": "assistant",
+   "text": "Your application (SSP26604350) is approved. You should be getting Rs 250 every month. So far, Rs 3750 has been paid into your bank account ending in 0112.\n\nHowever, you need to provide your yearly life certificate. It was due on 14 September 2026. If you don't do this, your payments might stop.\n\nWould you like to do that now?",
+   "tools": [
+    "my_status"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "yes, he is sitting here, please do it"
+  },
+  {
+   "role": "assistant",
+   "text": "Done. Your life certificate is recorded. Your next one will be due by 9 October 2027.",
+   "tools": [
+    "confirm_alive"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "thank you"
+  }
+ ],
+ "checks": [
+  {
+   "name": "life_certified",
+   "ok": true,
+   "detail": "confirmed 2026-10-14T05:27:25.333817, next due 2027-10-09"
+  },
+  {
+   "name": "application_count count=1",
+   "ok": true,
+   "detail": "1 application(s)"
+  },
+  {
+   "name": "grievance_count count=0",
+   "ok": true,
+   "detail": "0 complaint(s)"
+  }
+ ],
+ "passed": true,
+ "turns": 2,
+ "duration_s": 123,
+ "model": "gemma-4-26b-a4b-it",
+ "ran_at": "2026-10-14 10:58"
+}

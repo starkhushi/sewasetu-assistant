@@ -1,0 +1,48 @@
+{
+ "id": "nirmali_already_pending",
+ "role": "citizen",
+ "persona": {
+  "name": "Nirmali Chetia",
+  "age": 66,
+  "village": "Namti Chariali, Namti block",
+  "who": "Applied at the counter nine days ago, has heard nothing, assumes it was lost and wants to apply again \"properly this time\". Her son-in-law is typing.\n",
+  "wants": "Apply again.",
+  "voice": "Polite, anxious, long messages, says \"please\" a lot.",
+  "must_be_true": "Still exactly one application, the original, still PENDING. No second application. The assistant explained the deemed-approval date (the 15-day rule) instead of applying again.\n"
+ },
+ "transcript": [
+  {
+   "role": "user",
+   "text": "Please help, my mother-in-law applied at the block office 9 days back and nothing has happened. Can we apply again through you so it is done properly?"
+  },
+  {
+   "role": "assistant",
+   "text": "I can see that an application (SSP26776378) was already submitted on 5 October.\n\nIt is currently waiting for the block officer. By law, if the officer doesn't make a decision by 20 October, the pension is approved automatically. \n\nSince that is only 6 days away, it is best to wait. You don't need to do anything else right now.",
+   "tools": [
+    "my_status"
+   ]
+  }
+ ],
+ "checks": [
+  {
+   "name": "application_count count=1",
+   "ok": true,
+   "detail": "1 application(s)"
+  },
+  {
+   "name": "application status=PENDING, channel=WEB",
+   "ok": true,
+   "detail": "SSP26776378 PENDING as expected"
+  },
+  {
+   "name": "transcript_contains_any texts=['automatically', 'deemed', '15 days', '15-day']",
+   "ok": true,
+   "detail": "said ['automatically']"
+  }
+ ],
+ "passed": true,
+ "turns": 1,
+ "duration_s": 76,
+ "model": "gemma-4-26b-a4b-it",
+ "ran_at": "2026-10-14 10:53"
+}

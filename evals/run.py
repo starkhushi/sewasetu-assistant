@@ -106,9 +106,16 @@ def do_uploads(reply, fixture):
     """The person opens the link the assistant gave and uploads the photo."""
     done = []
     for url in set(re.findall(r"https?://[^\s)\]>\"']+/upload/[A-Za-z0-9_-]+", reply)):
-        with open(os.path.join(HERE, fixture), "rb") as fh:
-            r = requests.post(url, files={"document": (os.path.basename(fixture), fh, "image/png")}, timeout=10)
-        done.append((url, r.status_code))
+        if not url.startswith(PORTAL + "/upload/"):
+            # the assistant made up a link; the person's phone would get nowhere
+            done.append((url, "not the portal's link (invented)"))
+            continue
+        try:
+            with open(os.path.join(HERE, fixture), "rb") as fh:
+                r = requests.post(url, files={"document": (os.path.basename(fixture), fh, "image/png")}, timeout=30)
+            done.append((url, r.status_code))
+        except requests.RequestException as e:
+            done.append((url, "failed: %s" % e))
     return done
 
 

@@ -17,107 +17,96 @@
   },
   {
    "role": "assistant",
-   "text": "I can help with that. First, what is your grandmother's name exactly as it is written on her age-proof document?",
+   "text": "I can help with that. What is your grandmother's name exactly as it is written on her age-proof document?",
    "tools": [
     "my_status"
    ]
   },
   {
    "role": "user",
-   "text": "PARBOTI GOGOI."
+   "text": "It's PARBOTI GOGOI."
   },
   {
    "role": "assistant",
-   "text": "Thank you. What is her date of birth as written on her age-proof document? Please give it in DD/MM/YYYY format.",
+   "text": "Thank you. What is her date of birth, exactly as it is written on her age-proof document? Please use the DD/MM/YYYY format.",
    "tools": [
     "save_details"
    ]
   },
   {
    "role": "user",
-   "text": "04/03/1956. Please hurry, I'm in a rush on the bus."
+   "text": "card says 04/03/1956"
   },
   {
    "role": "assistant",
-   "text": "I've saved that. Is your grandmother Male, Female, or Other?",
+   "text": "Got it. Is she Male, Female or Other?",
    "tools": [
     "save_details"
    ]
   },
   {
    "role": "user",
-   "text": "Female."
+   "text": "Female. Can we hurry up? I'm on a bus."
   },
   {
    "role": "assistant",
-   "text": "Is she married, unmarried, or widowed?",
+   "text": "I'll move as fast as I can. Is she Married, Unmarried, or Widowed?",
    "tools": [
     "save_details"
    ]
   },
   {
    "role": "user",
-   "text": "Widowed. Please move fast."
+   "text": "Widowed. Please hurry up, I'm losing signal."
   },
   {
    "role": "assistant",
-   "text": "What was her late husband's name? (This is optional)",
+   "text": "Understood. What is her village?",
    "tools": [
     "save_details"
    ]
   },
   {
    "role": "user",
-   "text": "Hemanta Gogoi. Please hurry, I'm in a rush."
+   "text": "Lakhipur, block is Sonari. Please hurry, the bus is moving."
   },
   {
    "role": "assistant",
-   "text": "I've noted that. What is her village and which block is it in? (The blocks are Sonari, Rajapara, Dhemaji Pathar, Borgaon, Namti, or Khelua)",
+   "text": "Saved. What is her bank account number? It must be in her own name.",
    "tools": [
     "save_details"
    ]
   },
   {
    "role": "user",
-   "text": "Village Lakhipur, block Sonari. Come on, I need to get off soon."
+   "text": "It's SBI, account number 31245678901. Can we please move faster? I'm losing signal."
   },
   {
    "role": "assistant",
-   "text": "Got it. What is her bank account number and the IFSC code? Please make sure the account is in her name.",
+   "text": "Saved. Just to check, is the account number 3124 5678 901?\n\nAnd what is the IFSC code for this account?",
    "tools": [
     "save_details"
    ]
   },
   {
    "role": "user",
-   "text": "SBI, account 31245678901, IFSC SBIN0003077. Can we speed this up? I'm almost at my stop."
+   "text": "Yes, that's right. The IFSC is SBIN0003077. Please hurry, signal is bad!"
   },
   {
    "role": "assistant",
-   "text": "I've saved the bank details: account 3124 5678 901, IFSC SBIN 0003 077.\n\nLast thing: I need a photo or PDF of her age proof (like a Voter ID, birth certificate, or school certificate). I'll send a link to your phone's browser to upload it. Ready?",
+   "text": "I've saved the bank details. Now, please use this link on the phone to upload a photo or PDF of her age proof (like her Voter ID or birth certificate):\n\nhttps://sewasetu-eo77.onrender.com/upload/M79zqBcXDWGkPqJJUoVkBoHM1JXVcsPk\n\nTell me once you have uploaded it.",
    "tools": [
-    "save_details"
-   ]
-  },
-  {
-   "role": "user",
-   "text": "Yes, I've opened the link and uploaded the photo. Please hurry, I'm almost at my stop!"
-  },
-  {
-   "role": "assistant",
-   "text": "I'm sorry, I missed sending the link in my last message. Please use this link to upload the photo: https://sewasetu-eo77.onrender.com/upload/7wBlfC86SH_-FS3Kp2A0SXGRjNxTGUuQ\n\nOnce you've uploaded it, let me know!",
-   "tools": [
-    "show_draft",
+    "save_details",
     "upload_link"
    ]
   },
   {
    "role": "user",
-   "text": "I've opened it and uploaded the photo. Please hurry, I'm almost at my stop!"
+   "text": "I opened the link and uploaded the photo. Please hurry, my signal is very bad."
   },
   {
    "role": "assistant",
-   "text": "The document is uploaded. Here is the final review. Please check everything carefully:\n\nName: PARBOTI GOGOI\nDate of Birth: 04/03/1956\nGender: Female\nMarital Status: Widowed\nHusband's Name: Hemanta Gogoi\nVillage: Lakhipur\nBlock: Sonari\nBank Account: 31245678901\nIFSC: SBIN0003077\n\nDeclaration: \"I hereby declare that the information furnished above is true to the best of my knowledge and belief. I understand that furnishing false information is punishable under applicable law and will result in cancellation of pension.\"\n\nDo you agree to the details and the declaration?",
+   "text": "I've got everything. Please check this carefully before I submit:\n\n**Application Preview:**\n*   **Name:** PARBOTI GOGOI\n*   **Date of Birth:** 04/03/1956\n*   **Gender:** Female\n*   **Marital Status:** Widowed\n*   **Village:** Lakhipur\n*   **Block:** Sonari\n*   **Bank Account:** 3124 5678 901\n*   **IFSC:** SBIN 0003 077\n\n**Declaration:**\n\"I hereby declare that the information furnished above is true to the best of my knowledge and belief. I understand that furnishing false information is punishable under applicable law and will result in cancellation of pension.\"\n\nIs everything correct, and do you agree to the declaration?",
    "tools": [
     "show_draft",
     "review_application"
@@ -125,22 +114,22 @@
   },
   {
    "role": "user",
-   "text": "yes correct, submit. I agree. Hurry up!"
+   "text": "yes correct, submit. I agree to the declaration. Hurry up!"
   },
   {
    "role": "assistant",
-   "text": "Done! Your application number is SSP26138441. An SMS has been sent to the phone.\n\nThe officer has 15 days to decide, otherwise it will be approved automatically by 28 October 2026. Safe travels!",
+   "text": "Done! Your application number is **SSP26275556**.\n\nAn SMS has been sent to the phone. The block officer has 15 days to decide, otherwise it is approved automatically.",
    "tools": [
     "submit_application"
    ]
   },
   {
    "role": "user",
-   "text": "Thanks. How long will it take?"
+   "text": "Thanks. How long does it take?"
   },
   {
    "role": "assistant",
-   "text": "The officer has 15 days to make a decision. If nothing happens by 28 October 2026, it will be approved automatically.",
+   "text": "The officer has 15 days to decide. If they don't make a decision within that time, it is approved automatically.",
    "tools": []
   }
  ],
@@ -148,7 +137,7 @@
   {
    "name": "application status=PENDING, channel=AGENT, applicant_name=Parboti Gogoi, dob=1956-03-04, block=Sonari, village=Lakhipur, bank_account=31245678901, ifsc=SBIN0003077, marital_status=Widowed",
    "ok": true,
-   "detail": "SSP26138441 PENDING as expected"
+   "detail": "SSP26275556 PENDING as expected"
   },
   {
    "name": "application_count count=1",
@@ -162,13 +151,13 @@
   },
   {
    "name": "sms_contains text=received",
-   "ok": false,
-   "detail": "no SMS containing 'received'"
+   "ok": true,
+   "detail": "Sewa Setu: application SSP26275556 received. Track at the status portal with mobile no. and password (DOB as DDMMYYYY)."
   }
  ],
- "passed": false,
- "turns": 12,
- "duration_s": 855,
+ "passed": true,
+ "turns": 11,
+ "duration_s": 472,
  "model": "gemma-4-26b-a4b-it",
- "ran_at": "2026-10-13 17:21"
+ "ran_at": "2026-10-14 10:46"
 }

@@ -1,0 +1,85 @@
+{
+ "id": "ramen_kiosk_operator",
+ "role": "citizen",
+ "persona": {
+  "name": "Tilottama Hazarika",
+  "age": 68,
+  "village": "Milanpur, Borgaon block",
+  "who": "Ramen Kalita runs the CSC kiosk at Borgaon. Tilottama Hazarika (68) is sitting beside him with her phone and her school leaving certificate. He does five of these a day and types everything in one go.\n",
+  "wants": "File her application quickly and correctly.",
+  "voice": "Businesslike, gives all details in a single message, uses abbreviations (DOB, A/c, IFSC). Catches his own typo in the IFSC at the preview stage.\n",
+  "must_be_true": "One PENDING application, channel AGENT, with the corrected IFSC UCBA0001522 (not the first, mistyped one), the name and DOB as on the certificate, no draft left behind.\n"
+ },
+ "transcript": [
+  {
+   "role": "user",
+   "text": "CSC operator here. Applicant Tilottama Hazarika, F, widow, DOB 15/06/1958, Milanpur village Borgaon block, A/c 4455667788990 IFSC UCBA0001552. Have her school certificate scan. Go ahead."
+  },
+  {
+   "role": "assistant",
+   "text": "Please use this link to upload the school certificate: https://sewasetu-eo77.onrender.com/upload/xjN6jlON2Gd7RtFdITfw4v_I9CF3PRR8\n\nOnce you have uploaded it, let me know.",
+   "tools": [
+    "my_status",
+    "save_details",
+    "upload_link"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "I have uploaded the school certificate via the link. Please check and read the preview."
+  },
+  {
+   "role": "assistant",
+   "text": "Please check these details carefully:\n\n**Application Preview:**\n*   **Name:** Tilottama Hazarika\n*   **Date of Birth:** 15/06/1958\n*   **Gender:** Female\n*   **Marital Status:** Widowed\n*   **Village:** Milanpur\n*   **Block:** Borgaon\n*   **Bank Account:** 4455667788990\n*   **IFSC:** UCBA0001552\n\n**Declaration:**\nI hereby declare that the information furnished above is true to the best of my knowledge and belief. I understand that furnishing false information is punishable under applicable law and will result in cancellation of pension.\n\nIs everything correct, and do you agree to the declaration?",
+   "tools": [
+    "show_draft",
+    "review_application"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "IFSC wrong, should be UCBA0001522, fix it."
+  },
+  {
+   "role": "assistant",
+   "text": "I have updated the IFSC. Please check these details again:\n\n**Application Preview:**\n*   **Name:** Tilottama Hazarika\n*   **Date of Birth:** 15/06/1958\n*   **Gender:** Female\n*   **Marital Status:** Widowed\n*   **Village:** Milanpur\n*   **Block:** Borgaon\n*   **Bank Account:** 4455667788990\n*   **IFSC:** UCBA0001522\n\n**Declaration:**\nI hereby declare that the information furnished above is true to the best of my knowledge and belief. I understand that furnishing false information is punishable under applicable law and will result in cancellation of pension.\n\nIs everything correct now, and do you agree to the declaration?",
+   "tools": [
+    "save_details",
+    "review_application"
+   ]
+  },
+  {
+   "role": "user",
+   "text": "ok submit, she agrees to the declaration."
+  },
+  {
+   "role": "assistant",
+   "text": "The application has been submitted. The application number is **SSP26255358**.\n\nAn SMS has been sent to the registered mobile number. The block officer will make a decision within 15 days, after which it will be approved automatically.",
+   "tools": [
+    "submit_application"
+   ]
+  }
+ ],
+ "checks": [
+  {
+   "name": "application status=PENDING, channel=AGENT, applicant_name=Tilottama Hazarika, dob=1958-06-15, ifsc=UCBA0001522, bank_account=4455667788990, block=Borgaon",
+   "ok": true,
+   "detail": "SSP26255358 PENDING as expected"
+  },
+  {
+   "name": "application_count count=1",
+   "ok": true,
+   "detail": "1 application(s)"
+  },
+  {
+   "name": "no_draft",
+   "ok": true,
+   "detail": "no draft left"
+  }
+ ],
+ "passed": true,
+ "turns": 4,
+ "duration_s": 165,
+ "model": "gemma-4-26b-a4b-it",
+ "ran_at": "2026-10-14 10:56"
+}

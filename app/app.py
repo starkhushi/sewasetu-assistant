@@ -151,6 +151,15 @@ REJECT_REASON_MIN = 10   # characters; "no" is not a reason an applicant can act
 LIFE_CERT_MONTHS = 12
 
 
+def a_year_from(d):
+    """The same calendar day next year (28 Feb when the day is 29 Feb)."""
+    d = d.date() if isinstance(d, datetime) else d
+    try:
+        return d.replace(year=d.year + 1)
+    except ValueError:
+        return d.replace(year=d.year + 1, day=28)
+
+
 def deemed_on(submitted_at):
     """The day a still-pending application stands approved under the RTPS Act."""
     return (submitted_at + timedelta(days=SLA_DAYS)).date()
@@ -176,7 +185,7 @@ def decide_application(cur, app_id, new_status, actor, note=""):
                     "effective_from = date_trunc('month', submitted_at)::date, "
                     "life_certificate_due = %s "
                     "WHERE id = %s AND status = 'PENDING' RETURNING application_no, mobile",
-                    (new_status, now, actor, (now + timedelta(days=30 * LIFE_CERT_MONTHS)).date(),
+                    (new_status, now, actor, a_year_from(now),
                      app_id))
     else:
         cur.execute("UPDATE applications SET status = %s, decided_at = %s, decided_by = %s "
