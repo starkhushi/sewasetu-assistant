@@ -34,7 +34,7 @@ it</b>, the way you would talk to someone at the counter.</p>
   <b class="big">Easiest: chat right here</b>
   No app to install, nothing to set up. <a class="btn btn-sm inline" href="/assistant" style="margin-left:6px">Open the chat assistant</a>
 </div>
-<p>Or use the assistant you already have on your phone (like Claude):</p>
+<p>Or use an AI assistant you already have, if it supports connectors:</p>
 
 <h3>How it works</h3>
 <ol class="steps3">
@@ -110,14 +110,9 @@ sign-in any time from <a href="/status/connections">Connected applications</a>.<
     <tr><th>Citizen MCP endpoint</th><td><code>{{ citizen_url }}</code></td></tr>
     <tr><th>Officer MCP endpoint</th><td><code>{{ officer_url }}</code></td></tr>
   </table>
-  <p class="note" style="margin-top:14px">From Claude Code:</p>
-  <div class="copy">
-<pre class="code" id="cmd">claude mcp add --transport http sewasetu-citizen {{ citizen_url }}
-claude mcp add --transport http sewasetu-officer {{ officer_url }}</pre>
-  <button type="button" onclick="copyText('cmd', this)">Copy</button>
-  </div>
-  <p class="note">Then run <code>/mcp</code>, pick the server and choose Authenticate. How I tested
-  this: <a href="/eval-dashboard">evaluation dashboard</a>.</p>
+  <p class="note" style="margin-top:14px">In any assistant that supports MCP: add the endpoint as a
+  remote MCP server (streamable HTTP), then sign in when it asks; this portal's sign-in page opens in
+  the browser. How I tested this: <a href="/eval-dashboard">evaluation dashboard</a>.</p>
 </details>
 
 <script>
